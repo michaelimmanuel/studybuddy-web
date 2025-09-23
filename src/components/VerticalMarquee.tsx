@@ -36,8 +36,8 @@ export function VerticalMarquee({
       <div
         className={cn("flex flex-col gap-4", dirClass)}
         style={{
-          ["--marquee-duration" as any]: `${duration}s`,
-          ["--marquee-gap" as any]: "1rem", // matches gap-4
+          ["--marquee-duration" as string]: `${duration}s`,
+          ["--marquee-gap" as string]: "1rem", // matches gap-4
         }}
       >
         {content}
