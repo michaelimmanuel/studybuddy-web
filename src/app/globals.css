@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+
+
+@theme inline {
+
+}
+
+@media (prefers-color-scheme: dark) {
+
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
