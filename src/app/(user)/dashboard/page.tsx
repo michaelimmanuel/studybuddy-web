@@ -49,7 +49,7 @@ export default function DashboardPage() {
       // ignore errors on logout
     }
     clearToken();
-    router.push("/auth/login");
+    router.push("/login"); // Fixed: changed from /auth/login to /login
   }
 
   return (

@@ -1,0 +1,139 @@
+"use client";
+
+import { useState } from "react";
+import Modal from "./Modal";
+import Button from "@/components/Button";
+
+interface CreateCourseModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (courseData: { title: string; description: string }) => Promise<void>;
+}
+
+export default function CreateCourseModal({ isOpen, onClose, onSubmit }: CreateCourseModalProps) {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: ""
+  });
+  const [errors, setErrors] = useState<{ title?: string; description?: string; general?: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleClose = () => {
+    setFormData({ title: "", description: "" });
+    setErrors({});
+    onClose();
+  };
+
+  const validateForm = () => {
+    const newErrors: { title?: string; description?: string } = {};
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required";
+    } else if (formData.title.trim().length < 3) {
+      newErrors.title = "Title must be at least 3 characters";
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    } else if (formData.description.trim().length < 10) {
+      newErrors.description = "Description must be at least 10 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      await onSubmit({
+        title: formData.title.trim(),
+        description: formData.description.trim()
+      });
+      handleClose();
+    } catch (error) {
+      console.error("Failed to create course:", error);
+      setErrors({ general: "Failed to create course. Please try again." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const footer = (
+    <>
+      <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
+        Cancel
+      </Button>
+      <Button type="submit" loading={isSubmitting} onClick={handleSubmit}>
+        Create Course
+      </Button>
+    </>
+  );
+
+  return (
+    <Modal 
+      isOpen={isOpen} 
+      onClose={handleClose} 
+      title="Create New Course"
+      footer={footer}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {errors.general && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-sm text-red-800">{errors.general}</p>
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="course-title" className="block text-sm font-medium text-gray-700 mb-1">
+            Course Title *
+          </label>
+          <input
+            id="course-title"
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
+              errors.title ? 'border-red-300' : 'border-gray-300'
+            }`}
+            placeholder="Enter course title"
+            disabled={isSubmitting}
+          />
+          {errors.title && (
+            <p className="text-sm text-red-600 mt-1">{errors.title}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="course-description" className="block text-sm font-medium text-gray-700 mb-1">
+            Course Description *
+          </label>
+          <textarea
+            id="course-description"
+            value={formData.description}
+            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            rows={4}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
+              errors.description ? 'border-red-300' : 'border-gray-300'
+            }`}
+            placeholder="Enter course description"
+            disabled={isSubmitting}
+          />
+          {errors.description && (
+            <p className="text-sm text-red-600 mt-1">{errors.description}</p>
+          )}
+        </div>
+
+        <div className="text-sm text-gray-500">
+          * Required fields
+        </div>
+      </form>
+    </Modal>
+  );
+}
