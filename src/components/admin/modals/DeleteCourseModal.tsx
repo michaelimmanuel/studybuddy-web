@@ -10,6 +10,7 @@ interface DeleteCourseModalProps {
   course: Course | null;
   onClose: () => void;
   onConfirm: () => Promise<void>;
+  onSuccess: () => void;
 }
 
 export default function DeleteCourseModal({ isOpen, course, onClose, onConfirm }: DeleteCourseModalProps) {

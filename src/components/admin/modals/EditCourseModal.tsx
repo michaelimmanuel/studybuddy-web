@@ -3,16 +3,18 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
 import Button from "@/components/Button";
-import type { Course } from "@/types";
+import type { Course, UpdateCourseResponse } from "@/types";
+import api from "@/lib/api";
 
 interface EditCourseModalProps {
   isOpen: boolean;
   course: Course | null;
   onClose: () => void;
-  onSubmit: (courseData: { title: string; description: string }) => Promise<void>;
+  onSubmit?: (courseData: { title: string; description: string }) => Promise<void>;
+  onSuccess?: (updatedCourse: Course) => void;
 }
 
-export default function EditCourseModal({ isOpen, course, onClose, onSubmit }: EditCourseModalProps) {
+export default function EditCourseModal({ isOpen, course, onClose, onSubmit, onSuccess }: EditCourseModalProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: ""
@@ -64,10 +66,20 @@ export default function EditCourseModal({ isOpen, course, onClose, onSubmit }: E
     setErrors({});
 
     try {
-      await onSubmit({
-        title: formData.title.trim(),
-        description: formData.description.trim()
-      });
+      if (onSubmit) {
+        await onSubmit({
+          title: formData.title.trim(),
+          description: formData.description.trim()
+        });
+      } else if (course && onSuccess) {
+        // Handle API call directly using the API client
+        const response = await api.put<UpdateCourseResponse>(`/api/courses/${course.id}`, {
+          title: formData.title.trim(),
+          description: formData.description.trim()
+        });
+        
+        onSuccess(response.course);
+      }
       handleClose();
     } catch (error) {
       console.error("Failed to update course:", error);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import Button from "@/components/Button";
 import CreateCourseModal from "./modals/CreateCourseModal";
@@ -10,6 +11,7 @@ import api from "@/lib/api";
 import type { Course, PaginatedResponse } from "@/types";
 
 export default function CourseManagement() {
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -123,9 +125,17 @@ export default function CourseManagement() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-900">Course Management</h2>
-        <Button onClick={() => setShowCreateModal(true)}>
-          Create New Course
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            variant="outline"
+            onClick={() => router.push('/admin/courses')}
+          >
+            View All Courses
+          </Button>
+          <Button onClick={() => setShowCreateModal(true)}>
+            Create New Course
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -166,6 +176,13 @@ export default function CourseManagement() {
                   </div>
                   
                   <div className="flex items-center space-x-2 ml-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/admin/courses/${course.id}`)}
+                    >
+                      View
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -244,6 +261,10 @@ export default function CourseManagement() {
           setSelectedCourse(null);
         }}
         onConfirm={handleDeleteCourse}
+        onSuccess={() => {
+          // Optionally refresh courses or show a toast
+          fetchCourses(pagination.page);
+        }}
       />
     </div>
   );
