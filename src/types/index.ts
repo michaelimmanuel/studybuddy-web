@@ -121,201 +121,78 @@ export interface UpdateCourseResponse {
   course: Course;
 }
 
-// Quiz Types (matching API documentation)
-export interface QuizAnswer {
+// Question Types (question-based architecture)
+export interface Answer {
   id: string;
   text: string;
-  isCorrect: boolean;
+  isCorrect?: boolean; // Only visible to admins
 }
 
-export interface QuizQuestion {
+export interface Question {
   id: string;
   text: string;
-  answers: QuizAnswer[];
-}
-
-// Form types for creating quizzes (before API assigns IDs)
-export interface QuizAnswerForm {
-  id?: string;
-  text: string;
-  isCorrect: boolean;
-}
-
-export interface QuizQuestionForm {
-  id?: string;
-  text: string;
-  answers: QuizAnswerForm[];
-}
-
-export interface Quiz {
-  id: string;
-  title: string;
-  timeLimit: number;
   createdAt: string;
-  course?: {
-    id: string;
-    title: string;
-  };
-  questions?: QuizQuestion[];
-  questionCount?: number;
-  submissionCount?: number;
-  userSubmission?: {
-    id: string;
-    score: number;
-    submittedAt: string;
-  } | null;
+  answers: Answer[];
 }
 
-// API Response Types
-export interface GetCourseQuizzesResponse {
+// Question API Response Types
+export interface GetCourseQuestionsResponse {
   course: {
     id: string;
     title: string;
   };
-  quizzes: {
-    id: string;
-    title: string;
-    timeLimit: number;
-    createdAt: string;
-    questionCount: number;
-    submissionCount: number;
-    userSubmission?: {
-      id: string;
-      score: number;
-      submittedAt: string;
-    } | null;
-  }[];
-}
-
-export interface GetQuizByIdResponse {
-  quiz: {
-    id: string;
-    title: string;
-    timeLimit: number;
-    createdAt: string;
-    course: {
-      id: string;
-      title: string;
-    };
-    questions: QuizQuestion[];
-    userSubmission: {
-      id: string;
-      score: number;
-      submittedAt: string;
-    } | null;
+  questions: Question[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
   };
 }
 
-export interface CreateQuizRequest {
-  courseId: string;
-  title: string;
-  timeLimit: number;
-  questions: {
-    text: string;
-    answers: {
-      text: string;
-      isCorrect: boolean;
-    }[];
-  }[];
-}
-
-export interface CreateQuizResponse {
-  message: string;
-  quiz: {
-    id: string;
-    title: string;
-    timeLimit: number;
-    createdAt: string;
-    course: {
-      id: string;
-      title: string;
-    };
-    questions: QuizQuestion[];
-  };
-}
-
-export interface UpdateQuizRequest {
-  title?: string;
-  timeLimit?: number;
-}
-
-export interface UpdateQuizResponse {
-  message: string;
-  quiz: {
-    id: string;
-    title: string;
-    timeLimit: number;
-    updatedAt: string;
-  };
-}
-
-export interface GetQuizDetailResponse {
-  quiz: {
-    id: string;
-    title: string;
-    timeLimit: number;
-    createdAt: string;
-    updatedAt: string;
-    course: {
-      id: string;
-      title: string;
-    };
-    questions: QuizQuestion[];
-  };
-}
-
-export interface SubmitQuizRequest {
+export interface CreateQuestionRequest {
+  text: string;
   answers: {
-    questionId: string;
-    answerId: string;
+    text: string;
+    isCorrect: boolean;
   }[];
 }
 
-export interface SubmitQuizResponse {
+export interface CreateQuestionResponse {
   message: string;
-  submission: {
-    id: string;
-    score: number;
-    submittedAt: string;
-    correctAnswers: number;
-    totalQuestions: number;
-  };
+  question: Question;
 }
 
-export interface GetQuizSubmissionsResponse {
-  quiz: {
-    id: string;
-    title: string;
-    course: {
-      id: string;
-      title: string;
-    };
-  };
-  submissions: {
-    id: string;
-    score: number;
-    submittedAt: string;
-    user: {
-      id: string;
-      name: string;
-      email: string;
-    };
+export interface UpdateQuestionRequest {
+  text?: string;
+  answers?: {
+    text: string;
+    isCorrect: boolean;
   }[];
+}
+
+export interface UpdateQuestionResponse {
+  message: string;
+  question: Question;
+}
+
+export interface GetQuestionStatsResponse {
   stats: {
-    totalSubmissions: number;
-    averageScore: number;
-    highestScore: number;
-    lowestScore: number;
+    totalQuestions: number;
+    questionsWithMultipleCorrectAnswers: number;
+    averageAnswersPerQuestion: number;
+    questionsCreatedThisWeek: number;
+    questionsCreatedThisMonth: number;
   };
 }
 
-// Legacy types for compatibility
-export interface QuizSubmission {
-  id: string;
-  score: number;
-  submittedAt: string;
-  correctAnswers: number;
-  totalQuestions: number;
+// Form types for creating questions
+export interface AnswerForm {
+  text: string;
+  isCorrect: boolean;
 }
 
-export interface CourseQuizzesResponse extends GetCourseQuizzesResponse {}
+export interface QuestionForm {
+  text: string;
+  answers: AnswerForm[];
+}

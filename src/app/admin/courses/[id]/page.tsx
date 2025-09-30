@@ -6,8 +6,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import EditCourseModal from "@/components/admin/modals/EditCourseModal";
 import DeleteCourseModal from "@/components/admin/modals/DeleteCourseModal";
-import CreateQuizModal from "@/components/admin/modals/CreateQuizModal";
-import QuizList, { QuizListRef } from "@/components/admin/QuizList";
+import CreateQuestionModal from "@/components/admin/modals/CreateQuestionModal";
+import QuestionBank, { QuestionBankRef } from "@/components/admin/QuestionBank";
+import QuestionStats from "@/components/admin/QuestionStats";
 import api from "@/lib/api";
 import type { Course, GetCourseByIdResponse } from "@/types";
 
@@ -15,7 +16,7 @@ export default function CourseDetailPage() {
   const params = useParams();
   const router = useRouter();
   const courseId = params.id as string;
-  const quizListRef = useRef<QuizListRef>(null);
+  const questionBankRef = useRef<QuestionBankRef>(null);
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,7 +25,7 @@ export default function CourseDetailPage() {
   // Modal states
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showCreateQuizModal, setShowCreateQuizModal] = useState(false);
+  const [showCreateQuestionModal, setShowCreateQuestionModal] = useState(false);
 
   const fetchCourse = async () => {
     try {
@@ -55,11 +56,11 @@ export default function CourseDetailPage() {
     router.push('/admin/courses');
   };
 
-  const handleQuizCreateSuccess = async (quiz: any) => {
-    setShowCreateQuizModal(false);
-    // Refetch the quiz list to show the newly created quiz
-    if (quizListRef.current) {
-      await quizListRef.current.refetch();
+  const handleQuestionCreateSuccess = async (question: any) => {
+    setShowCreateQuestionModal(false);
+    // Refetch the question bank to show the newly created question
+    if (questionBankRef.current) {
+      await questionBankRef.current.refetch();
     }
   };
 
@@ -301,12 +302,15 @@ export default function CourseDetailPage() {
           </div>
         </Card>
 
-        {/* Quiz Management Section */}
-        <QuizList 
-          ref={quizListRef}
+        {/* Question Bank Section */}
+        <QuestionBank 
+          ref={questionBankRef}
           course={course}
-          onCreateQuiz={() => setShowCreateQuizModal(true)}
+          onCreateQuestion={() => setShowCreateQuestionModal(true)}
         />
+
+        {/* Question Statistics */}
+        <QuestionStats courseId={course.id} />
 
         {/* Modals */}
         {course && (
@@ -324,11 +328,11 @@ export default function CourseDetailPage() {
               onConfirm={handleDeleteCourse}
               onSuccess={handleDeleteSuccess}
             />
-            <CreateQuizModal
-              isOpen={showCreateQuizModal}
-              onClose={() => setShowCreateQuizModal(false)}
+            <CreateQuestionModal
+              isOpen={showCreateQuestionModal}
+              onClose={() => setShowCreateQuestionModal(false)}
               course={course}
-              onSuccess={handleQuizCreateSuccess}
+              onSuccess={handleQuestionCreateSuccess}
             />
           </>
         )}
