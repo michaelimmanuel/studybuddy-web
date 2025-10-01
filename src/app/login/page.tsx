@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
+import api from '@/lib/api';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -28,8 +29,23 @@ export default function LoginPage() {
             if (result.error) {
                 setError(result.error.message || 'Login failed');
             } else {
-
-                router.push('/dashboard');
+                // Check user role and redirect accordingly
+                try {
+                    const isAdminResponse = await api.get<any>("/api/users/is-admin");
+                    console.log("Admin check response:", isAdminResponse);
+                    
+                    if (isAdminResponse.isAdmin === true) {
+                        // Redirect admin users to admin dashboard
+                        router.push('/admin/dashboard');
+                    } else {
+                        // Redirect regular users to user dashboard
+                        router.push('/dashboard');
+                    }
+                } catch (roleCheckError) {
+                    console.error('Role check failed:', roleCheckError);
+                    // Default to user dashboard if role check fails
+                    router.push('/dashboard');
+                }
             }
         } catch (err: any) {
             console.error('Login error:', err);
