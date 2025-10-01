@@ -4,6 +4,7 @@ import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Card } from "@/components/ui/card";
 import Button from "@/components/Button";
 import EditQuestionModal from "./modals/EditQuestionModal";
+import ExplanationModal from "./modals/ExplanationModal";
 import type { Question, Course, GetCourseQuestionsResponse } from "@/types";
 import api from "@/lib/api";
 
@@ -29,6 +30,8 @@ const QuestionBank = forwardRef<QuestionBankRef, QuestionBankProps>(({ course, o
   const [error, setError] = useState<string | null>(null);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showExplanationModal, setShowExplanationModal] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
 
   const fetchQuestions = async (page: number = 1) => {
     try {
@@ -86,6 +89,11 @@ const QuestionBank = forwardRef<QuestionBankRef, QuestionBankProps>(({ course, o
     setEditingQuestion(null);
     // Refetch the questions to get the updated data
     fetchQuestions(pagination.page);
+  };
+
+  const handleShowExplanation = (question: Question) => {
+    setSelectedQuestion(question);
+    setShowExplanationModal(true);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -181,13 +189,21 @@ const QuestionBank = forwardRef<QuestionBankRef, QuestionBankProps>(({ course, o
                   </div>
 
                   {userRole === 'admin' && (
-                    <div className="flex space-x-2 ml-4">
+                    <div className="flex flex-col space-y-2 ml-4">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleEditQuestion(question)}
                       >
                         Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleShowExplanation(question)}
+                        className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                      >
+                        View Explanation
                       </Button>
                       <Button
                         variant="outline"
@@ -243,6 +259,16 @@ const QuestionBank = forwardRef<QuestionBankRef, QuestionBankProps>(({ course, o
           setEditingQuestion(null);
         }}
         onSuccess={handleEditSuccess}
+      />
+
+      {/* Explanation Modal */}
+      <ExplanationModal
+        isOpen={showExplanationModal}
+        question={selectedQuestion}
+        onClose={() => {
+          setShowExplanationModal(false);
+          setSelectedQuestion(null);
+        }}
       />
     </div>
   );

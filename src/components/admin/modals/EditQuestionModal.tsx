@@ -15,6 +15,7 @@ interface EditQuestionModalProps {
 
 export default function EditQuestionModal({ isOpen, question, onClose, onSuccess }: EditQuestionModalProps) {
   const [questionText, setQuestionText] = useState("");
+  const [questionExplanation, setQuestionExplanation] = useState("");
   const [answers, setAnswers] = useState<AnswerForm[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -22,6 +23,7 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
   useEffect(() => {
     if (question) {
       setQuestionText(question.text);
+      setQuestionExplanation(question.explanation || "");
       setAnswers(question.answers.map(answer => ({
         text: answer.text,
         isCorrect: answer.isCorrect || false
@@ -31,6 +33,7 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
 
   const handleClose = () => {
     setQuestionText("");
+    setQuestionExplanation("");
     setAnswers([]);
     setErrors({});
     onClose();
@@ -78,7 +81,8 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
           .map(answer => ({
             text: answer.text.trim(),
             isCorrect: answer.isCorrect
-          }))
+          })),
+        explanation: questionExplanation.trim() || undefined
       };
 
       const response = await api.put<UpdateQuestionResponse>(`/api/questions/${question.id}`, updateData);
@@ -199,6 +203,25 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
 
           {errors.answers && <p className="text-red-500 text-sm">{errors.answers}</p>}
           {errors.correct && <p className="text-red-500 text-sm">{errors.correct}</p>}
+        </div>
+
+        {/* Question Explanation */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Question Explanation (optional, 0-1000 characters)
+          </label>
+          <textarea
+            value={questionExplanation}
+            onChange={(e) => setQuestionExplanation(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={3}
+            placeholder="Provide an explanation for this question to help students learn..."
+            maxLength={1000}
+          />
+          <div className="flex justify-between items-center mt-1">
+            <small className="text-gray-500">This explanation will help students understand the concept</small>
+            <small className="text-gray-500">{questionExplanation.length}/1000 characters</small>
+          </div>
         </div>
 
         {errors.general && (

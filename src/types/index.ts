@@ -133,6 +133,7 @@ export interface Question {
   text: string;
   createdAt: string;
   answers: Answer[];
+  explanation?: string; // Single explanation per question, only visible to admins
 }
 
 // Question API Response Types
@@ -156,6 +157,7 @@ export interface CreateQuestionRequest {
     text: string;
     isCorrect: boolean;
   }[];
+  explanation?: string; // Single explanation per question (0-1000 characters)
 }
 
 export interface CreateQuestionResponse {
@@ -169,6 +171,7 @@ export interface UpdateQuestionRequest {
     text: string;
     isCorrect: boolean;
   }[];
+  explanation?: string; // Single explanation per question (0-1000 characters)
 }
 
 export interface UpdateQuestionResponse {
@@ -195,4 +198,5 @@ export interface AnswerForm {
 export interface QuestionForm {
   text: string;
   answers: AnswerForm[];
+  explanation?: string; // Single explanation per question
 }
