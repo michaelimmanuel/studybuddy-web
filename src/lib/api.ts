@@ -80,6 +80,18 @@ export async function request<T = any>(
     finalHeaders.Authorization = `Bearer ${resolvedToken}`;
   }
 
+  // Ensure cookies are always sent for authentication
+  const credentials = (rest as any).credentials ?? 'include';
+  
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[API] ${method} ${url}`, {
+      headers: finalHeaders,
+      credentials,
+      hasBody: body !== undefined
+    });
+  }
+
   let attempt = 0;
 
   while (true) {
@@ -99,12 +111,24 @@ export async function request<T = any>(
         headers: finalHeaders,
         body: body !== undefined ? JSON.stringify(body) : undefined,
         signal: controller.signal,
-        // default to sending cookies so httpOnly session cookies set by the server are included
-        credentials: (rest as any).credentials ?? 'include',
+        // Ensure cookies are sent with all requests for session management
+        credentials: credentials,
+        // Additional options for better cookie handling
+        mode: 'cors',
         ...rest,
       } as RequestInit);
 
       if (timeoutId) clearTimeout(timeoutId);
+
+      // Debug response in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[API] Response ${res.status}:`, {
+          url,
+          status: res.status,
+          headers: Object.fromEntries(res.headers.entries()),
+          ok: res.ok
+        });
+      }
 
       const contentType = res.headers.get('content-type') || '';
       const isJson = contentType.includes('application/json');

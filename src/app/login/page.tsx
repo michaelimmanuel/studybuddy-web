@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import api from '@/lib/api';
+import { cookieDebugger } from '@/lib/cookie-debugger';
+import { railwayCookieFix } from '@/lib/railway-cookie-fix';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -18,6 +20,11 @@ export default function LoginPage() {
         setBusy(true);
 
         try {
+            // Debug cookies before login
+            if (process.env.NODE_ENV === 'development') {
+                console.log('[Login] Cookies before login:');
+                cookieDebugger.logAllCookies();
+            }
             
             const result = await authClient.signIn.email({
                 email: email.trim().toLowerCase(),
@@ -29,6 +36,18 @@ export default function LoginPage() {
             if (result.error) {
                 setError(result.error.message || 'Login failed');
             } else {
+                // Debug cookies after successful login
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('[Login] Cookies after login:');
+                    cookieDebugger.checkAuthCookies();
+                    
+                    // Run complete Railway diagnostic
+                    await railwayCookieFix.runCompleteDiagnostic();
+                    
+                    // Test cookie transmission
+                    await cookieDebugger.testCookieTransmission();
+                }
+                
                 // Check user role and redirect accordingly
                 try {
                     const isAdminResponse = await api.get<any>("/api/users/is-admin");
