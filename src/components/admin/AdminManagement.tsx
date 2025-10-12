@@ -63,7 +63,7 @@ export default function AdminManagement() {
   const fetchAdminUsers = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await api.get<AdminUsersResponse>(`/api/users/admins?page=${page}&limit=10`);
+      const response = await api.get<AdminUsersResponse>(`/api/users/admin-list?page=${page}&limit=10`);
       
       console.log('API Response:', response); // Debug log
       

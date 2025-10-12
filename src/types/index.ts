@@ -132,8 +132,13 @@ export interface Question {
   id: string;
   text: string;
   createdAt: string;
+  courseId?: string;
   answers: Answer[];
   explanation?: string; // Single explanation per question, only visible to admins
+  course?: {
+    id: string;
+    title: string;
+  };
 }
 
 // Question API Response Types
@@ -149,6 +154,10 @@ export interface GetCourseQuestionsResponse {
     total: number;
     totalPages: number;
   };
+}
+
+export interface GetAllQuestionsResponse {
+  questions: Question[];
 }
 
 export interface CreateQuestionRequest {
@@ -199,4 +208,87 @@ export interface QuestionForm {
   text: string;
   answers: AnswerForm[];
   explanation?: string; // Single explanation per question
+}
+
+// Package Types
+export interface Package {
+  id: string;
+  title: string;
+  description?: string;
+  price: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  packageQuestions?: PackageQuestion[];
+}
+
+export interface PackageQuestion {
+  id: string;
+  packageId: string;
+  questionId: string;
+  order?: number;
+  createdAt: string;
+  question: Question;
+}
+
+export interface PackageForm {
+  title: string;
+  description?: string;
+  price: number;
+}
+
+export interface AddQuestionsToPackageRequest {
+  questionIds: string[];
+}
+
+export interface RemoveQuestionsFromPackageRequest {
+  questionIds: string[];
+}
+
+// API Response Types for Packages
+export interface GetPackagesResponse {
+  success: boolean;
+  data: Package[];
+}
+
+export interface GetPackageByIdResponse {
+  success: boolean;
+  data: Package;
+}
+
+export interface CreatePackageResponse {
+  success: boolean;
+  message: string;
+  data: Package;
+}
+
+export interface UpdatePackageResponse {
+  success: boolean;
+  message: string;
+  data: Package;
+}
+
+export interface DeletePackageResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface AddQuestionsToPackageResponse {
+  success: boolean;
+  message: string;
+  data: {
+    packageId: string;
+    questionsAdded: number;
+    duplicatesSkipped: number;
+  };
+}
+
+export interface RemoveQuestionsFromPackageResponse {
+  success: boolean;
+  message: string;
+  data: {
+    packageId: string;
+    questionsRemoved: number;
+  };
 }
