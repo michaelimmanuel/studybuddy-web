@@ -126,7 +126,13 @@ export default function AdminLayout({
               onClick={() => router.push("/admin/users")}
               className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
             >
-              Users
+              User Management
+            </button>
+            <button
+              onClick={() => router.push("/admin/courses")}
+              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
+            >
+              Courses
             </button>
             <button
               onClick={() => router.push("/admin/analytics")}
