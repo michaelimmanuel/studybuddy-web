@@ -221,13 +221,13 @@ export default function PackageManagement() {
                       {new Date(pkg.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                      <button
-                        onClick={() => openQuestionsModal(pkg)}
+                      <a
+                        href={`/admin/packages/${pkg.id}/manage-questions`}
                         className="text-purple-600 hover:text-purple-900"
                         title="Manage Questions"
                       >
                         Questions
-                      </button>
+                      </a>
                       <button
                         onClick={() => togglePackageStatus(pkg)}
                         className={`${
@@ -295,17 +295,7 @@ export default function PackageManagement() {
         />
       )}
 
-      {showQuestionsModal && selectedPackage && (
-        <ManagePackageQuestionsModal
-          isOpen={showQuestionsModal}
-          onClose={() => {
-            setShowQuestionsModal(false);
-            setSelectedPackage(null);
-          }}
-          onSuccess={handleQuestionsSuccess}
-          package={selectedPackage}
-        />
-      )}
+      {/* Removed ManagePackageQuestionsModal, now handled by dedicated page */}
     </div>
   );
 }
