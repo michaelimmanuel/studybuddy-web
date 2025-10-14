@@ -21,6 +21,9 @@ export default function EditPackageModal({ isOpen, onClose, onSuccess, package: 
     description: "",
     price: 0,
     isActive: true,
+    timeLimit: undefined,
+    availableFrom: "",
+    availableUntil: "",
   });
 
   useEffect(() => {
@@ -30,6 +33,9 @@ export default function EditPackageModal({ isOpen, onClose, onSuccess, package: 
         description: pkg.description || "",
         price: pkg.price,
         isActive: pkg.isActive,
+        timeLimit: pkg.timeLimit,
+        availableFrom: pkg.availableFrom ? pkg.availableFrom.slice(0, 16) : "", // Convert to datetime-local format
+        availableUntil: pkg.availableUntil ? pkg.availableUntil.slice(0, 16) : "",
       });
     }
   }, [pkg]);
@@ -152,6 +158,62 @@ export default function EditPackageModal({ isOpen, onClose, onSuccess, package: 
           <p className="text-xs text-gray-500 mt-1">
             Enter the price in Indonesian Rupiah (e.g., 299000)
           </p>
+        </div>
+
+        <div>
+          <label htmlFor="edit-timeLimit" className="block text-sm font-medium text-gray-700 mb-2">
+            Time Limit (minutes)
+          </label>
+          <input
+            type="number"
+            id="edit-timeLimit"
+            value={formData.timeLimit || ""}
+            onChange={(e) => setFormData({ ...formData, timeLimit: e.target.value ? parseInt(e.target.value) : undefined })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter time limit in minutes (optional)"
+            min="1"
+            max="10080"
+            disabled={loading}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Maximum 10080 minutes (1 week). Leave empty for no time limit.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="edit-availableFrom" className="block text-sm font-medium text-gray-700 mb-2">
+              Available From
+            </label>
+            <input
+              type="datetime-local"
+              id="edit-availableFrom"
+              value={formData.availableFrom}
+              onChange={(e) => setFormData({ ...formData, availableFrom: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              disabled={loading}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              When the package becomes available (optional)
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="edit-availableUntil" className="block text-sm font-medium text-gray-700 mb-2">
+              Available Until
+            </label>
+            <input
+              type="datetime-local"
+              id="edit-availableUntil"
+              value={formData.availableUntil}
+              onChange={(e) => setFormData({ ...formData, availableUntil: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              disabled={loading}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              When the package expires (optional)
+            </p>
+          </div>
         </div>
 
         <div>

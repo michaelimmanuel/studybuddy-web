@@ -8,10 +8,11 @@ import type {
   Package, 
   Question, 
   Course,
-  GetAllQuestionsResponse,
+  GetCourseQuestionsResponse,
   AddQuestionsToPackageResponse,
   RemoveQuestionsFromPackageResponse 
 } from "@/types";
+import type { AddRandomQuestionsFromCourseResponse } from "@/types";
 
 interface ManagePackageQuestionsModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export default function ManagePackageQuestionsModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<"current" | "add">("current");
+  const [showRandom, setShowRandom] = useState(false);
   
   // Available questions to add
   const [availableQuestions, setAvailableQuestions] = useState<Question[]>([]);
@@ -36,6 +38,8 @@ export default function ManagePackageQuestionsModal({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [courses, setCourses] = useState<Course[]>([]);
+  const [randomCourseId, setRandomCourseId] = useState<string>("");
+  const [randomCount, setRandomCount] = useState<number>(10);
   
   // Selected questions for operations
   const [selectedQuestionsToAdd, setSelectedQuestionsToAdd] = useState<string[]>([]);
@@ -44,18 +48,22 @@ export default function ManagePackageQuestionsModal({
   // Fetch courses for filtering
   const fetchCourses = async () => {
     try {
-      const response = await api.get<{courses: Course[]}>("/api/courses");
+      const response = await api.get<{courses: Course[]}>("/api/courses?limit=100&page=1");
       setCourses(response.courses || []);
     } catch (err) {
       console.error("Failed to fetch courses:", err);
     }
   };
 
-  // Fetch available questions (not in package)
-  const fetchAvailableQuestions = async () => {
+  // Fetch available questions (not in package) for a specific course
+  const fetchAvailableQuestions = async (courseId?: string) => {
+    if (!courseId) {
+      setAvailableQuestions([]);
+      return;
+    }
     setAvailableLoading(true);
     try {
-      const response = await api.get<GetAllQuestionsResponse>("/api/questions");
+      const response = await api.get<GetCourseQuestionsResponse>(`/api/courses/${courseId}/questions?limit=100&page=1`);
       const allQuestions = response.questions || [];
       
       // Filter out questions already in package
@@ -64,8 +72,8 @@ export default function ManagePackageQuestionsModal({
       
       setAvailableQuestions(available);
     } catch (err) {
-      console.error("Failed to fetch questions:", err);
-      setError("Failed to load available questions");
+      console.error("Failed to fetch course questions:", err);
+      setError("Failed to load questions for the selected course");
     } finally {
       setAvailableLoading(false);
     }
@@ -74,9 +82,15 @@ export default function ManagePackageQuestionsModal({
   useEffect(() => {
     if (isOpen) {
       fetchCourses();
-      fetchAvailableQuestions();
     }
-  }, [isOpen, pkg.id]);
+  }, [isOpen]);
+
+  // Load questions when course filter changes
+  useEffect(() => {
+    if (isOpen) {
+      fetchAvailableQuestions(selectedCourse);
+    }
+  }, [isOpen, selectedCourse, pkg.id]);
 
   const handleAddQuestions = async () => {
     if (selectedQuestionsToAdd.length === 0) {
@@ -132,9 +146,39 @@ export default function ManagePackageQuestionsModal({
       setSelectedQuestionsToRemove([]);
       setSearchTerm("");
       setSelectedCourse("");
+      setRandomCourseId("");
+      setRandomCount(10);
+      setShowRandom(false);
       setError(null);
       setTab("current");
       onClose();
+    }
+  };
+
+  const handleAddRandom = async () => {
+    if (!randomCourseId) {
+      setError("Please select a course for random selection");
+      return;
+    }
+    if (!Number.isInteger(randomCount) || randomCount < 1 || randomCount > 200) {
+      setError("Count must be an integer between 1 and 200");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.post<AddRandomQuestionsFromCourseResponse>(
+        `/api/packages/${pkg.id}/questions/random`,
+        { courseId: randomCourseId, count: randomCount }
+      );
+      // refresh available and parent
+      await fetchAvailableQuestions();
+      onSuccess();
+      setShowRandom(false);
+    } catch (err: any) {
+      setError(err.data?.message || "Failed to add random questions");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -353,8 +397,74 @@ export default function ManagePackageQuestionsModal({
               </div>
             </div>
 
+            {/* Add Random Section */}
+            <div className="border border-dashed rounded-md p-4 bg-gray-50">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold text-gray-800">Add Random Questions From Course</h4>
+                <button
+                  type="button"
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                  onClick={() => setShowRandom(!showRandom)}
+                >
+                  {showRandom ? "Hide" : "Show"}
+                </button>
+              </div>
+              {showRandom && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                  <div className="md:col-span-2">
+                    <label htmlFor="random-course" className="block text-sm font-medium text-gray-700 mb-1">
+                      Select Course
+                    </label>
+                    <select
+                      id="random-course"
+                      value={randomCourseId}
+                      onChange={(e) => setRandomCourseId(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Choose a course...</option>
+                      {courses.map((course) => (
+                        <option key={course.id} value={course.id}>
+                          {course.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="random-count" className="block text-sm font-medium text-gray-700 mb-1">
+                      Count
+                    </label>
+                    <input
+                      type="number"
+                      id="random-count"
+                      value={randomCount}
+                      min={1}
+                      max={200}
+                      onChange={(e) => setRandomCount(parseInt(e.target.value || '0', 10))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="md:col-span-3">
+                    <Button
+                      type="button"
+                      onClick={handleAddRandom}
+                      loading={loading}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      Add Random Questions
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Available Questions */}
-            {availableLoading ? (
+            {selectedCourse === "" ? (
+              <div className="text-center py-8">
+                <div className="text-gray-400 text-4xl mb-4">📘</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Select a course</h3>
+                <p className="text-gray-600">Choose a course above to load its questions</p>
+              </div>
+            ) : availableLoading ? (
               <div className="flex justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>

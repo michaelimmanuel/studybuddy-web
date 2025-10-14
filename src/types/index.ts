@@ -217,6 +217,9 @@ export interface Package {
   description?: string;
   price: number;
   isActive: boolean;
+  timeLimit?: number; // Time limit in minutes
+  availableFrom?: string; // ISO string
+  availableUntil?: string; // ISO string
   createdAt: string;
   updatedAt: string;
   createdBy: string;
@@ -236,6 +239,9 @@ export interface PackageForm {
   title: string;
   description?: string;
   price: number;
+  timeLimit?: number; // Time limit in minutes
+  availableFrom?: string; // ISO string or empty string
+  availableUntil?: string; // ISO string or empty string
 }
 
 export interface AddQuestionsToPackageRequest {
@@ -290,5 +296,17 @@ export interface RemoveQuestionsFromPackageResponse {
   data: {
     packageId: string;
     questionsRemoved: number;
+  };
+}
+
+export interface AddRandomQuestionsFromCourseResponse {
+  success: boolean;
+  message: string;
+  data: {
+    packageId: string;
+    courseId: string;
+    requested: number;
+    added: number;
+    remainingAvailable: number;
   };
 }
