@@ -310,3 +310,74 @@ export interface AddRandomQuestionsFromCourseResponse {
     remainingAvailable: number;
   };
 }
+
+// Bundle Types
+export interface BundlePackageRef {
+  id: string;
+  packageId: string;
+  order?: number;
+  package: Package;
+}
+
+export interface BundleStats {
+  totalOriginalPrice: number;
+  totalQuestions: number;
+  savings: number;
+  savingsPercentage: number;
+  packagesCount: number;
+}
+
+export interface Bundle {
+  id: string;
+  title: string;
+  description?: string;
+  price: number;
+  discount?: number | null;
+  isActive: boolean;
+  availableFrom?: string;
+  availableUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  bundlePackages?: BundlePackageRef[];
+  stats?: BundleStats;
+}
+
+export interface BundleForm {
+  title: string;
+  description?: string;
+  price: number;
+  discount?: number | null;
+  availableFrom?: string; // ISO or empty
+  availableUntil?: string; // ISO or empty
+  packageIds: string[]; // selected packages to add after creation
+}
+
+// Purchase Types
+export interface PackagePurchase {
+  id: string;
+  userId: string;
+  packageId: string;
+  pricePaid: number;
+  purchasedAt: string;
+  expiresAt?: string | null;
+  package?: { id: string; title: string; price: number };
+}
+
+export interface BundlePurchase {
+  id: string;
+  userId: string;
+  bundleId: string;
+  pricePaid: number;
+  purchasedAt: string;
+  expiresAt?: string | null;
+  bundle?: { id: string; title: string; price: number };
+}
+
+export interface GetBundlesResponse { success: boolean; data: Bundle[]; }
+export interface GetBundleByIdResponse { success: boolean; data: Bundle; }
+
+export interface PurchasePackageResponse { success: boolean; message: string; data: PackagePurchase; }
+export interface PurchaseBundleResponse { success: boolean; message: string; data: BundlePurchase; }
+export interface GetMyPurchasesResponse { success: boolean; data: { packages: PackagePurchase[]; bundles: BundlePurchase[] } }
+export interface CheckPackageAccessResponse { success: boolean; data: { packageId: string; hasAccess: boolean } }
