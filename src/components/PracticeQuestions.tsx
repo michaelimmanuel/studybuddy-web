@@ -159,7 +159,13 @@ export default function PracticeQuestions({ courseId }: PracticeQuestionsProps) 
 
         {/* Question */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">{currentQuestion.text}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">{currentQuestion.text}</h2>
+          {currentQuestion.imageUrl && (
+            <div className="mb-6">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={currentQuestion.imageUrl} alt="Question" className="max-h-72 rounded border mx-auto" />
+            </div>
+          )}
           
           <div className="space-y-3">
             {currentQuestion.answers.map((answer, index) => (

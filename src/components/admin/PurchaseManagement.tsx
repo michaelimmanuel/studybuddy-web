@@ -70,7 +70,7 @@ export default function AdminPurchaseManagement() {
     setActionLoading(`${type}-${id}-${action}`);
     try {
       if (action === "delete") {
-        await api.delete(`/api/purchases/admin/${type}/${id}`);
+        await api.del(`/api/purchases/admin/${type}/${id}`);
       } else {
         await api.post(`/api/purchases/admin/${type}/${id}/${action}`);
       }

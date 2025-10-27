@@ -5,11 +5,13 @@ import { Card } from "@/components/ui/card";
 import Button from "@/components/Button";
 import EditQuestionModal from "./modals/EditQuestionModal";
 import ExplanationModal from "./modals/ExplanationModal";
-import type { Question, Course, GetCourseQuestionsResponse } from "@/types";
+import type { Question, GetCourseQuestionsResponse } from "@/types";
 import api from "@/lib/api";
 
+type CourseRef = { id: string; title: string };
+
 interface QuestionBankProps {
-  course: Course;
+  course: CourseRef;
   onCreateQuestion: () => void;
   userRole?: string;
 }
@@ -163,6 +165,12 @@ const QuestionBank = forwardRef<QuestionBankRef, QuestionBankProps>(({ course, o
                   <div className="flex-1">
                     <div className="mb-3">
                       <h4 className="text-lg font-semibold text-gray-900 mb-2">{question.text}</h4>
+                      {question.imageUrl && (
+                        <div className="mt-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={question.imageUrl} alt="Question" className="max-h-56 rounded border" />
+                        </div>
+                      )}
                     </div>
                     
                     <div className="space-y-2 mb-4">

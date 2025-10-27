@@ -10,14 +10,25 @@ export interface GetCourseByIdResponse {
   course: Course;
 }
 
-// API Response for courses list
-export interface GetAllCoursesResponse {
-  courses: Course[];
+// Core Course type used across admin UI
+export interface Course {
+  id: string;
+  title: string;
+  description?: string;
+  createdAt: string;
+  updatedAt?: string;
+  // Some views show this; not always returned
+  enrollmentCount?: number;
+}
+
+// API Response for questionBanks list
+export interface GetAllQuestionBanksResponse {
+  questionBanks: QuestionBank[];
   pagination: {
     page: number;
     limit: number;
     totalPages: number;
-    totalCourses: number;
+    totalQuestionBanks: number;
   };
 }
 
@@ -42,26 +53,13 @@ export interface UserStats {
 
 // Course Types
 // Course Types (matching API documentation exactly)
-export interface Course {
+export interface QuestionBank {
   id: string;
   title: string;
   description: string;
   createdAt: string;
   updatedAt: string;
-  enrollmentCount: number;
-  isEnrolled?: boolean; // For list endpoint
-  // Additional fields from course detail API
-  userEnrollment?: {
-    status: string;
-    enrolledAt: string;
-  };
-  enrolledUsers?: {
-    id: string;
-    name: string;
-    email: string;
-    image: string | null;
-    enrolledAt: string;
-  }[];
+  // Add any other fields relevant to question banks
 }
 
 // API Response for course detail
@@ -104,21 +102,21 @@ export interface PaginatedResponse<T> {
 }
 
 // Form Types
-export interface CourseFormData {
+export interface QuestionBankFormData {
   title: string;
   description: string;
 }
 
-export interface CreateCourseRequest extends CourseFormData {}
-export interface UpdateCourseRequest extends CourseFormData {}
+export interface CreateQuestionBankRequest extends QuestionBankFormData {}
+export interface UpdateQuestionBankRequest extends QuestionBankFormData {}
 
 // API Response Types for Course Operations  
-export interface CreateCourseResponse {
-  course: Course;
+export interface CreateQuestionBankResponse {
+  questionBank: QuestionBank;
 }
 
-export interface UpdateCourseResponse {
-  course: Course;
+export interface UpdateQuestionBankResponse {
+  questionBank: QuestionBank;
 }
 
 // Question Types (question-based architecture)
@@ -135,6 +133,7 @@ export interface Question {
   courseId?: string;
   answers: Answer[];
   explanation?: string; // Single explanation per question, only visible to admins
+  imageUrl?: string; // Optional image associated with the question
   course?: {
     id: string;
     title: string;
@@ -167,6 +166,7 @@ export interface CreateQuestionRequest {
     isCorrect: boolean;
   }[];
   explanation?: string; // Single explanation per question (0-1000 characters)
+  imageUrl?: string; // Optional image URL
 }
 
 export interface CreateQuestionResponse {
@@ -181,6 +181,7 @@ export interface UpdateQuestionRequest {
     isCorrect: boolean;
   }[];
   explanation?: string; // Single explanation per question (0-1000 characters)
+  imageUrl?: string; // Optional image URL
 }
 
 export interface UpdateQuestionResponse {
@@ -208,6 +209,7 @@ export interface QuestionForm {
   text: string;
   answers: AnswerForm[];
   explanation?: string; // Single explanation per question
+  imageUrl?: string; // Optional image URL
 }
 
 // Package Types
@@ -381,3 +383,88 @@ export interface PurchasePackageResponse { success: boolean; message: string; da
 export interface PurchaseBundleResponse { success: boolean; message: string; data: BundlePurchase; }
 export interface GetMyPurchasesResponse { success: boolean; data: { packages: PackagePurchase[]; bundles: BundlePurchase[] } }
 export interface CheckPackageAccessResponse { success: boolean; data: { packageId: string; hasAccess: boolean } }
+
+// Quiz Attempt Types
+export interface QuizAnswer {
+  id: string;
+  attemptId: string;
+  questionId: string;
+  selectedAnswerId: string | null;
+  isCorrect: boolean;
+  createdAt: string;
+  question?: Question;
+  selectedAnswer?: Answer;
+}
+
+export interface QuizAttempt {
+  id: string;
+  userId: string;
+  packageId: string;
+  score: number;
+  correctAnswers: number;
+  totalQuestions: number;
+  timeSpent: number;
+  startedAt: string;
+  completedAt: string;
+  createdAt: string;
+  answers?: QuizAnswer[];
+  package?: {
+    id: string;
+    title: string;
+    description?: string;
+  };
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+export interface SubmitQuizAttemptRequest {
+  packageId: string;
+  answers: {
+    questionId: string;
+    selectedAnswerId: string | null;
+  }[];
+  timeSpent: number;
+  startedAt: string;
+}
+
+export interface SubmitQuizAttemptResponse {
+  success: boolean;
+  message: string;
+  data: QuizAttempt;
+}
+
+export interface GetMyAttemptsResponse {
+  success: boolean;
+  data: QuizAttempt[];
+}
+
+export interface GetAttemptByIdResponse {
+  success: boolean;
+  data: QuizAttempt;
+}
+
+export interface AdminGetAllAttemptsResponse {
+  success: boolean;
+  data: {
+    attempts: QuizAttempt[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+    };
+  };
+}
+
+export interface AdminGetQuizStatsResponse {
+  success: boolean;
+  data: {
+    totalAttempts: number;
+    averageScore: number;
+    averageTimeSpent: number;
+    passRate: number;
+    passedCount: number;
+  };
+}

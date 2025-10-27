@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
 import Button from "@/components/Button";
+import ImageUpload from "@/components/ImageUpload";
 import type { Question, UpdateQuestionRequest, UpdateQuestionResponse, AnswerForm } from "@/types";
 import api from "@/lib/api";
 
@@ -16,6 +17,7 @@ interface EditQuestionModalProps {
 export default function EditQuestionModal({ isOpen, question, onClose, onSuccess }: EditQuestionModalProps) {
   const [questionText, setQuestionText] = useState("");
   const [questionExplanation, setQuestionExplanation] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [answers, setAnswers] = useState<AnswerForm[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -24,6 +26,7 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
     if (question) {
       setQuestionText(question.text);
       setQuestionExplanation(question.explanation || "");
+      setImageUrl(question.imageUrl || "");
       setAnswers(question.answers.map(answer => ({
         text: answer.text,
         isCorrect: answer.isCorrect || false
@@ -34,6 +37,7 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
   const handleClose = () => {
     setQuestionText("");
     setQuestionExplanation("");
+    setImageUrl("");
     setAnswers([]);
     setErrors({});
     onClose();
@@ -82,7 +86,8 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
             text: answer.text.trim(),
             isCorrect: answer.isCorrect
           })),
-        explanation: questionExplanation.trim() || undefined
+        explanation: questionExplanation.trim() || undefined,
+        imageUrl: imageUrl.trim() || undefined
       };
 
       const response = await api.put<UpdateQuestionResponse>(`/api/questions/${question.id}`, updateData);
@@ -223,6 +228,16 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
             <small className="text-gray-500">{questionExplanation.length}/1000 characters</small>
           </div>
         </div>
+
+        {/* S3 Image Upload */}
+        <ImageUpload
+          onUploadComplete={(url) => setImageUrl(url)}
+          onUploadError={(error) => setErrors({ ...errors, imageUrl: error })}
+          currentImageUrl={imageUrl}
+          folder="questions"
+          label="Question Image (optional)"
+          buttonText="Upload Image to S3"
+        />
 
         {errors.general && (
           <div className="bg-red-50 border border-red-200 rounded-md p-3">

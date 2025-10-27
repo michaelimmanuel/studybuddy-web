@@ -3,12 +3,21 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import Button from "@/components/Button";
-import type { Course, CreateQuestionRequest, CreateQuestionResponse, AnswerForm, QuestionForm } from "@/types";
+import ImageUpload from "@/components/ImageUpload";
+import type { CreateQuestionRequest, CreateQuestionResponse, AnswerForm, QuestionForm } from "@/types";
 import api from "@/lib/api";
+
+interface Course {
+  id: string;
+  title: string;
+  description?: string;
+}
+
+type CourseRef = { id: string; title: string };
 
 interface CreateQuestionModalProps {
   isOpen: boolean;
-  course: Course | null;
+  course: CourseRef | null;
   onClose: () => void;
   onSuccess?: (question: any) => void;
 }
@@ -16,6 +25,7 @@ interface CreateQuestionModalProps {
 export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess }: CreateQuestionModalProps) {
   const [questionText, setQuestionText] = useState("");
   const [questionExplanation, setQuestionExplanation] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [answers, setAnswers] = useState<AnswerForm[]>([
     { text: "", isCorrect: false },
     { text: "", isCorrect: false },
@@ -29,6 +39,7 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
   const handleClose = () => {
     setQuestionText("");
     setQuestionExplanation("");
+    setImageUrl("");
     setAnswers([
       { text: "", isCorrect: false },
       { text: "", isCorrect: false },
@@ -83,7 +94,8 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
             text: answer.text.trim(),
             isCorrect: answer.isCorrect
           })),
-        explanation: questionExplanation.trim() || undefined
+        explanation: questionExplanation.trim() || undefined,
+        imageUrl: imageUrl.trim() || undefined
       };
 
       const response = await api.post<CreateQuestionResponse>(`/api/courses/${course.id}/questions`, questionData);
@@ -224,6 +236,16 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
             <small className="text-gray-500">{questionExplanation.length}/1000 characters</small>
           </div>
         </div>
+
+        {/* S3 Image Upload */}
+        <ImageUpload
+          onUploadComplete={(url) => setImageUrl(url)}
+          onUploadError={(error) => setErrors({ ...errors, imageUrl: error })}
+          currentImageUrl={imageUrl}
+          folder="questions"
+          label="Question Image (optional)"
+          buttonText="Upload Image to S3"
+        />
 
         {errors.general && (
           <div className="bg-red-50 border border-red-200 rounded-md p-3">
