@@ -229,14 +229,14 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
           </div>
         </div>
 
-        {/* S3 Image Upload */}
+        {/* Tencent COS Image Upload */}
         <ImageUpload
           onUploadComplete={(url) => setImageUrl(url)}
           onUploadError={(error) => setErrors({ ...errors, imageUrl: error })}
           currentImageUrl={imageUrl}
           folder="questions"
-          label="Question Image (optional)"
-          buttonText="Upload Image to S3"
+          label="Question Image (Optional)"
+          buttonText="Upload Image"
         />
 
         {errors.general && (

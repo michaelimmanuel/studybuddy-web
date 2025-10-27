@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { uploadToS3, type UploadProgress, type UploadResult } from "@/lib/s3-upload";
+import { uploadToTencentCOS, type UploadProgress, type UploadResult } from "@/lib/tencent-cos-upload";
 
 interface ImageUploadProps {
   onUploadComplete: (url: string) => void;
@@ -61,10 +61,10 @@ export default function ImageUpload({
     };
     reader.readAsDataURL(file);
 
-    // Upload to S3
+    // Upload to Tencent COS
     setUploading(true);
     try {
-      const result: UploadResult = await uploadToS3(
+      const result: UploadResult = await uploadToTencentCOS(
         file,
         folder,
         (progressData: UploadProgress) => {
