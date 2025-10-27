@@ -16,9 +16,20 @@ export interface Course {
   title: string;
   description?: string;
   createdAt: string;
-  updatedAt?: string;
+  updatedAt: string;
   // Some views show this; not always returned
   enrollmentCount?: number;
+  isEnrolled?: boolean;
+  userEnrollment?: {
+    status: string;
+  };
+  enrolledUsers?: Array<{
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+    enrolledAt: string;
+  }>;
 }
 
 // API Response for questionBanks list
