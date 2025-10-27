@@ -27,7 +27,7 @@ export default function EditCourseModal({ isOpen, course, onClose, onSubmit, onS
     if (course) {
       setFormData({
         title: course.title,
-        description: course.description
+        description: course.description || ""
       });
     }
   }, [course]);

@@ -93,13 +93,13 @@ export default function DeleteCourseModal({ isOpen, course, onClose, onConfirm }
                 {course.description}
               </p>
               <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                <span>{course.enrollmentCount} enrollments</span>
+                <span>{course.enrollmentCount ?? 0} enrollments</span>
                 <span>Created {new Date(course.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
           )}
 
-          {course && course.enrollmentCount > 0 && (
+          {course && course.enrollmentCount && course.enrollmentCount > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
               <p className="text-sm text-red-800">
                 <strong>Note:</strong> This course has {course.enrollmentCount} enrollment{course.enrollmentCount !== 1 ? 's' : ''}. 

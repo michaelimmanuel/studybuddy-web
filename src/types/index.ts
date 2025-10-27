@@ -78,6 +78,22 @@ export interface GetCourseByIdResponse {
   course: Course;
 }
 
+export interface GetAllCoursesResponse {
+  courses: Course[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalPages: number;
+    totalCourses: number;
+  };
+}
+
+export interface UpdateCourseResponse {
+  success: boolean;
+  message: string;
+  course: Course;
+}
+
 export interface CourseStats {
   totalCourses: number;
   totalEnrollments: number;
