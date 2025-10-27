@@ -115,14 +115,7 @@ export default function UserCoursePage() {
                     <h3 className="text-lg font-medium text-gray-900 mb-2">About This Course</h3>
                     <p className="text-gray-600">{course.description}</p>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Course Details</h3>
-                    <ul className="text-sm text-gray-600 space-y-2">
-                    <li><strong>Created:</strong> {course.createdAt ? new Date(course.createdAt).toLocaleDateString() : '—'}</li>
-                    <li><strong>Last Updated:</strong> {course.updatedAt ? new Date(course.updatedAt).toLocaleDateString() : '—'}</li>
-                    <li><strong>Enrolled Students:</strong> {(course as any).enrolledUsers?.length ?? 0}</li>
-                    </ul>
-                  </div>
+                  
                 </div>
               </Card>
 
