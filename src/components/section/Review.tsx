@@ -24,48 +24,50 @@ const Review = () => {
     }
 
   return (
-    <section
-      className="mx-auto max-w-[80vw] rounded-2xl p-6 md:p-8 lg:p-10"
-      style={{ backgroundColor: "var(--brand)", color: "var(--brand-foreground)" }}
-    >
-      <div className="grid items-start gap-8 lg:grid-cols-3 ">
-        {/* Left column - copy */}
-        <div className="flex flex-col justify-center h-full space-y-4">
-          <p className="text-sm opacity-90">Suara pengguna StudyBuddy</p>
-          <h2 className="text-pretty text-3xl font-semibold leading-tight md:text-4xl">
-            Belajar gigi tuh bisa seru juga, lho! Ini cerita temen-temen yang udah belajar langsung.
-          </h2>
-          <Button className='mt-4 text-base font-medium bg-white !text-green w-64'>
-            Gabung Sekarang
-          </Button>
+    <section className="bg-gradient-to-b from-[#005FAA]/[0.79] to-[#FFFCFC]">
+        <div
+          className="mx-auto max-w-[80vw] rounded-2xl p-6 md:p-8 lg:p-10 bg-[#005FA9]"
+          
+        >
+          <div className="grid items-start gap-8 lg:grid-cols-3 ">
+            {/* Left column - copy */}
+            <div className="flex flex-col justify-center h-full space-y-4 text-white">
+              <p className="text-sm opacity-90">Suara pengguna StudyBuddy</p>
+              <h2 className="text-pretty text-3xl font-semibold leading-tight md:text-4xl">
+                Belajar gigi tuh bisa seru juga, lho! Ini cerita temen-temen yang udah belajar langsung.
+              </h2>
+              <Button className='mt-4 text-base font-medium bg-white text-black w-64 hover:bg-gray-100 hover:scale-105 transition-all duration-300'>
+                Gabung Sekarang
+              </Button>
+            </div>
+
+            {/* Middle column - comes from bottom (scroll up) */}
+            <VerticalMarquee
+              direction="up"
+              duration={26}
+              items={stack(CARDS, 0).map((c, i) => <TestimonialCard key={i} {...c} />)}
+              className="mx-auto w-full"
+              height={560}
+            />
+
+            {/* Right column - comes from top (scroll down) */}
+            <VerticalMarquee
+              direction="down"
+              duration={26}
+              items={stack(CARDS, 2).map((c, i) => <TestimonialCard key={i} {...c} />)}
+              className="mx-auto w-full"
+              height={560}
+            />
+          </div>
+
+          {/* Optional: keep a hidden reference of the provided mockup for context */}
+          <img
+            src="/images/testimonials-reference.png"
+            alt="Reference design for the testimonials marquee section"
+            className="hidden"
+            aria-hidden="true"
+          />
         </div>
-
-        {/* Middle column - comes from bottom (scroll up) */}
-        <VerticalMarquee
-          direction="up"
-          duration={26}
-          items={stack(CARDS, 0).map((c, i) => <TestimonialCard key={i} {...c} />)}
-          className="mx-auto w-full"
-          height={560}
-        />
-
-        {/* Right column - comes from top (scroll down) */}
-        <VerticalMarquee
-          direction="down"
-          duration={26}
-          items={stack(CARDS, 2).map((c, i) => <TestimonialCard key={i} {...c} />)}
-          className="mx-auto w-full"
-          height={560}
-        />
-      </div>
-
-      {/* Optional: keep a hidden reference of the provided mockup for context */}
-      <img
-        src="/images/testimonials-reference.png"
-        alt="Reference design for the testimonials marquee section"
-        className="hidden"
-        aria-hidden="true"
-      />
     </section>
   )
 }

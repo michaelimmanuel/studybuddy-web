@@ -11,11 +11,11 @@ export default function Home() {
     <>
       <Hero />
       <About />
-      <div className="h-48"></div>
-      <Stats />
-      <div className="h-48"></div>
+      <div className="h-48 bg-[#002644]"></div>
+      {/* <Stats />
+      <div className="h-48"></div> */}
       <Pricing />
-      <div className="h-48"></div>
+      <div className="h-48 bg-gradient-to-b from-[#005FAA] to-[#005FAA]/[0.79]"></div>
       <Review/>
       <div className="h-48"></div>
       <FAQSection />

@@ -13,21 +13,21 @@ const Contact = () => {
       </div>
       {/* Right: Contact Info/Form (1/3) */}
       <div className="w-full md:w-1/3 flex flex-col px-4 py-8">
-       <div className="bg-green rounded-xl p-6 md:p-10 text-white w-full max-w-md mx-auto ">
+       <div className="bg-[#002644] rounded-xl p-6 md:p-10 text-white w-full max-w-md mx-auto ">
             <h2 className="text-2xl font-bold mb-4">Hubungi Kami</h2>
             <p className="text-lg text-white mb-4">Kami menjawab pertanyaan anda</p>
             <div className="space-y-2">
                 <div className='border-white border-1 rounded-lg px-4 py-2 flex items-center justify-center'>
                         <img src='/img/instagram.png' alt='Instagram' className='w-6 h-6 inline-block mr-2'/>
-                        <span className="text-lg">@enamed.indonesia</span>
+                        <span className="text-lg">@studybuddymeds</span>
                 </div>
                 <div className='border-white border-1 rounded-lg px-4 py-2 flex items-center justify-center'>
                         <img src='/img/whatsapp.png' alt='WhatsApp' className='w-6 h-6 inline-block mr-2'/>
-                        <span className="text-lg">@enamed.indonesia</span>
+                        <span className="text-lg">@studybuddymeds</span>
                 </div>
                 <div className='border-white border-1 rounded-lg px-4 py-2 flex items-center justify-center'>
                         <img src='/img/telegram.png' alt='Telegram' className='w-6 h-6 inline-block mr-2'/>
-                        <span className="text-lg">@enamed_indonesia</span>
+                        <span className="text-lg">@_studybuddyy</span>
                 </div>
             </div>
         </div>

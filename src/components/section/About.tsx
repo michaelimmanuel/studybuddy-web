@@ -2,7 +2,7 @@ import React from 'react'
 
 const About = () => {
   return (
-    <section className="flex flex-col md:flex-row items-center justify-between py-12 px-48">
+    <section className="flex flex-col md:flex-row items-center justify-between py-12 px-48 bg-gradient-to-b from-[#005FAA] to-[#002644] text-white">
       {/* Left: Image */}
       <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
         <img
@@ -15,14 +15,13 @@ const About = () => {
       </div>
       {/* Right: Text */}
       <div className="w-full md:w-1/2 flex flex-col justify-center px-4">
-        <h2 className="text-2xl font-bold mb-6 bg-[#06B2841A] w-fit px-6 py-2 text-green">Tentang Kami</h2>
-        <p className="text-lg text-gray-700 text-justify">
-         Enamed Indonesia adalah bimbingan belajar kedokteran gigi terbaik di Indonesia. Enamed Indonesia memilki pengajar yang berkualitas dan berasal dari universitas terbaik di Indonesia. Pengajar-pengajar kami sudah berpengalaman dan terlibat dari kegiatan-kegiatan seperti kompetisi, presentasi ilmiah, mantan asisten dosen, dan mentoring UKMP2DG
-        </p>
+        <h2 className="text-2xl font-bold mb-6  w-fit px-6 py-2 text-green">About Us</h2>
+        <p className="text-lg text-white text-justify">
+          Kami tahu, perjalanan menuju gelar dokter gigi bukanlah hal yang mudah
+          penuh tantangan, kebingungan, dan rasa lelah.
+          Di sinilah StudyBuddy hadir sebagai teman belajar yang siap membimbing Anda menghadapi perkuliahan, klinik hingga ujian UKMP2DG dengan cara yang lebih ringan, terarah, dan menyenangkan.
+          Namun perjalanan kita tidak berhenti sampai di situ. StudyBuddy tumbuh sebagai komunitas hangat bagi calon dokter dan dokter gigi di seluruh Indonesia—sebuah ruang untuk saling belajar, berbagi pengalaman, berkonsultasi, dan menemukan dukungan. Bukan hanya seputar dunia kedokteran gigi, tetapi juga tentang tantangan nyata yang kita hadapi bersama di kehidupan sehari-hari.        </p>
         <br />
-        <p className="text-lg text-gray-700 text-justify">
-            Visi kami adalah meningkatkan nilai kompetensi dari dokter gigi pada tahapan preklinik, klinik, maupun UKMP2DG dengan modul dan layanan bimbingan yang paling sesuai standar kualitas kedokteran gigi.. Yuk kepoin Enamed Indonesia!
-        </p>
       </div>
     </section>
   );
