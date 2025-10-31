@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import Button from "@/components/Button";
 import api from "@/lib/api";
 import type { GetAttemptByIdResponse, QuizAttempt } from "@/types";
+import RichText from "@/components/RichText";
 
 export default function QuizResultsPage() {
   const params = useParams();
@@ -186,7 +187,7 @@ export default function QuizResultsPage() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 flex-1">
-                      {index + 1}. {question.text}
+                      {index + 1}. <RichText html={question.text} />
                     </h3>
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -230,7 +231,7 @@ export default function QuizResultsPage() {
                             <span className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-sm font-medium mr-3">
                               {String.fromCharCode(65 + idx)}
                             </span>
-                            <span className="text-gray-900">{ans.text}</span>
+                            <RichText className="text-gray-900" html={ans.text} />
                             {isCorrectAnswer && (
                               <span className="ml-auto text-green-600 font-medium text-sm">
                                 ✓ Correct Answer
@@ -250,7 +251,7 @@ export default function QuizResultsPage() {
                   {question.explanation && (
                     <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <h4 className="font-medium text-blue-900 mb-2">Explanation:</h4>
-                      <p className="text-blue-800 text-sm">{question.explanation}</p>
+                      <RichText className="text-blue-800 text-sm" html={question.explanation} />
                       
                       {question.explanationImageUrl && (
                         <div className="mt-3">

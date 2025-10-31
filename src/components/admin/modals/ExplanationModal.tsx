@@ -2,6 +2,7 @@
 
 import Modal from "./Modal";
 import Button from "@/components/Button";
+import RichText from "@/components/RichText";
 import type { Question } from "@/types";
 
 interface ExplanationModalProps {
@@ -22,7 +23,7 @@ export default function ExplanationModal({ isOpen, question, onClose }: Explanat
         {/* Question Text */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <h4 className="font-medium text-gray-900 mb-2">Question:</h4>
-          <p className="text-gray-700 leading-relaxed">{question.text}</p>
+          <RichText className="text-gray-700 leading-relaxed" html={question.text} />
         </div>
 
         {/* Question Stats */}
@@ -61,7 +62,7 @@ export default function ExplanationModal({ isOpen, question, onClose }: Explanat
                 }`}>
                   {String.fromCharCode(65 + index)}
                 </span>
-                <span className="flex-1 text-gray-700">{answer.text}</span>
+                <RichText className="flex-1 text-gray-700" html={answer.text} />
                 {answer.isCorrect && (
                   <span className="text-green-600 text-sm font-medium flex items-center">
                     <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -84,7 +85,7 @@ export default function ExplanationModal({ isOpen, question, onClose }: Explanat
               </svg>
               <h4 className="font-medium text-blue-900">Explanation:</h4>
             </div>
-            <p className="text-blue-800 whitespace-pre-wrap leading-relaxed">{question.explanation}</p>
+            <RichText className="text-blue-800 leading-relaxed" html={question.explanation} />
             
             {/* Explanation Image */}
             {question.explanationImageUrl && (

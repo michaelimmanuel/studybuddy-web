@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import Button from "@/components/Button";
 import type { Question, GetCourseQuestionsResponse } from "@/types";
+import RichText from "@/components/RichText";
 import api from "@/lib/api";
 
 interface PracticeQuestionsProps {
@@ -159,7 +160,9 @@ export default function PracticeQuestions({ courseId }: PracticeQuestionsProps) 
 
         {/* Question */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">{currentQuestion.text}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <RichText html={currentQuestion.text} />
+          </h2>
           {currentQuestion.imageUrl && (
             <div className="mb-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -189,7 +192,7 @@ export default function PracticeQuestions({ courseId }: PracticeQuestionsProps) 
                   <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium mr-3">
                     {String.fromCharCode(65 + index)}
                   </span>
-                  <span className="text-gray-900">{answer.text}</span>
+                  <RichText className="text-gray-900" html={answer.text} />
                 </div>
               </label>
             ))}

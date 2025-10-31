@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Modal from "./Modal";
 import Button from "@/components/Button";
 import ImageUpload from "@/components/ImageUpload";
@@ -27,6 +27,9 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
   const [questionExplanation, setQuestionExplanation] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [explanationImageUrl, setExplanationImageUrl] = useState("");
+  const questionTextRef = useRef<HTMLDivElement | null>(null);
+  const questionExplanationRef = useRef<HTMLDivElement | null>(null);
+  const answerInputRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [answers, setAnswers] = useState<AnswerForm[]>([
     { text: "", isCorrect: false },
     { text: "", isCorrect: false },
@@ -36,6 +39,54 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Track if we're typing to prevent unnecessary re-renders
+  const isTypingQuestionText = useRef(false);
+  const isTypingExplanation = useRef(false);
+  const isTypingAnswer = useRef<number | null>(null);
+
+  // Track active formatting states
+  const [activeFormats, setActiveFormats] = useState({ b: false, i: false, u: false });
+
+  // Check which formats are active at cursor
+  const updateActiveFormats = () => {
+    const formats = { b: false, i: false, u: false };
+    
+    if (document.queryCommandState('bold')) formats.b = true;
+    if (document.queryCommandState('italic')) formats.i = true;
+    if (document.queryCommandState('underline')) formats.u = true;
+    
+    setActiveFormats(formats);
+  };
+
+  const wrapSelection = (
+    el: HTMLTextAreaElement | HTMLInputElement | null,
+    value: string,
+    setValue: (v: string) => void,
+    tag: 'b' | 'i' | 'u'
+  ) => {
+    if (!el) {
+      setValue(`<${tag}>${value}</${tag}>`);
+      return;
+    }
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? value.length;
+    const before = value.slice(0, start);
+    const selected = value.slice(start, end) || value;
+    const after = value.slice(end);
+    const wrapped = `${before}<${tag}>${selected}</${tag}>${after}`;
+    setValue(wrapped);
+    // Restore focus and cursor position after state update
+    setTimeout(() => {
+      const newPos = start + tag.length + 2; // after opening tag
+      el.focus();
+      el.setSelectionRange(newPos + selected.length, newPos + selected.length);
+    }, 0);
+  };
+
+  const applyFormatContentEditable = (tag: 'b' | 'i' | 'u') => {
+    document.execCommand(tag === 'b' ? 'bold' : tag === 'i' ? 'italic' : 'underline', false);
+  };
 
   const handleClose = () => {
     setQuestionText("");
@@ -150,15 +201,55 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Question Text (10-1000 characters)
           </label>
-          <textarea
-            value={questionText}
-            onChange={(e) => setQuestionText(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={4}
-            placeholder="Enter your question here..."
-            minLength={10}
-            maxLength={1000}
+          <div className="flex gap-2 mb-2">
+            <Button 
+              type="button" 
+              variant={activeFormats.b ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => applyFormatContentEditable('b')}
+              className={activeFormats.b ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
+            >
+              <b>B</b>
+            </Button>
+            <Button 
+              type="button" 
+              variant={activeFormats.i ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => applyFormatContentEditable('i')}
+              className={activeFormats.i ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
+            >
+              <i>I</i>
+            </Button>
+            <Button 
+              type="button" 
+              variant={activeFormats.u ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => applyFormatContentEditable('u')}
+              className={activeFormats.u ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
+            >
+              <u>U</u>
+            </Button>
+          </div>
+          <div
+            ref={(el) => {
+              questionTextRef.current = el;
+              if (el && !isTypingQuestionText.current && el.innerHTML !== questionText) {
+                el.innerHTML = questionText;
+              }
+            }}
+            contentEditable
+            onInput={(e) => {
+              isTypingQuestionText.current = true;
+              setQuestionText(e.currentTarget.innerHTML);
+              setTimeout(() => { isTypingQuestionText.current = false; }, 0);
+            }}
+            onKeyUp={updateActiveFormats}
+            onMouseUp={updateActiveFormats}
+            onFocus={updateActiveFormats}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] max-h-[200px] overflow-auto"
+            suppressContentEditableWarning
           />
+
           <div className="flex justify-between items-center mt-1">
             {errors.questionText && <p className="text-red-500 text-sm">{errors.questionText}</p>}
             <small className="text-gray-500 ml-auto">{questionText.length}/1000 characters</small>
@@ -194,15 +285,68 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
                 />
                 <span className="ml-2 text-sm text-gray-700">Correct</span>
               </label>
-              <input
-                type="text"
-                value={answer.text}
-                onChange={(e) => updateAnswer(index, e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder={`Answer ${index + 1}...`}
-                maxLength={500}
-                required
-              />
+              <div className="flex-1">
+                <div className="flex gap-2 mb-2">
+                  <Button 
+                    type="button" 
+                    variant={activeFormats.b ? "default" : "ghost"} 
+                    size="sm" 
+                    onClick={() => {
+                      const el = answerInputRefs.current[index];
+                      if (el) el.focus();
+                      applyFormatContentEditable('b');
+                    }}
+                    className={activeFormats.b ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
+                  >
+                    <b>B</b>
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant={activeFormats.i ? "default" : "ghost"} 
+                    size="sm" 
+                    onClick={() => {
+                      const el = answerInputRefs.current[index];
+                      if (el) el.focus();
+                      applyFormatContentEditable('i');
+                    }}
+                    className={activeFormats.i ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
+                  >
+                    <i>I</i>
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant={activeFormats.u ? "default" : "ghost"} 
+                    size="sm" 
+                    onClick={() => {
+                      const el = answerInputRefs.current[index];
+                      if (el) el.focus();
+                      applyFormatContentEditable('u');
+                    }}
+                    className={activeFormats.u ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
+                  >
+                    <u>U</u>
+                  </Button>
+                </div>
+                <div
+                  ref={(el) => { 
+                    answerInputRefs.current[index] = el;
+                    if (el && isTypingAnswer.current !== index && el.innerHTML !== answer.text) {
+                      el.innerHTML = answer.text;
+                    }
+                  }}
+                  contentEditable
+                  onInput={(e) => {
+                    isTypingAnswer.current = index;
+                    updateAnswer(index, e.currentTarget.innerHTML);
+                    setTimeout(() => { isTypingAnswer.current = null; }, 0);
+                  }}
+                  onKeyUp={updateActiveFormats}
+                  onMouseUp={updateActiveFormats}
+                  onFocus={updateActiveFormats}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px] max-h-[100px] overflow-auto"
+                  suppressContentEditableWarning
+                />
+              </div>
               {answers.length > 2 && (
                 <Button
                   type="button"
@@ -226,13 +370,53 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Question Explanation (optional, 0-1000 characters)
           </label>
-          <textarea
-            value={questionExplanation}
-            onChange={(e) => setQuestionExplanation(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-            placeholder="Provide an explanation for this question to help students learn..."
-            maxLength={1000}
+          <div className="flex gap-2 mb-2">
+            <Button 
+              type="button" 
+              variant={activeFormats.b ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => applyFormatContentEditable('b')}
+              className={activeFormats.b ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
+            >
+              <b>B</b>
+            </Button>
+            <Button 
+              type="button" 
+              variant={activeFormats.i ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => applyFormatContentEditable('i')}
+              className={activeFormats.i ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
+            >
+              <i>I</i>
+            </Button>
+            <Button 
+              type="button" 
+              variant={activeFormats.u ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => applyFormatContentEditable('u')}
+              className={activeFormats.u ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
+            >
+              <u>U</u>
+            </Button>
+          </div>
+          <div
+            ref={(el) => {
+              questionExplanationRef.current = el;
+              if (el && !isTypingExplanation.current && el.innerHTML !== questionExplanation) {
+                el.innerHTML = questionExplanation;
+              }
+            }}
+            contentEditable
+            onInput={(e) => {
+              isTypingExplanation.current = true;
+              setQuestionExplanation(e.currentTarget.innerHTML);
+              setTimeout(() => { isTypingExplanation.current = false; }, 0);
+            }}
+            onKeyUp={updateActiveFormats}
+            onMouseUp={updateActiveFormats}
+            onFocus={updateActiveFormats}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[75px] max-h-[150px] overflow-auto"
+            suppressContentEditableWarning
           />
           <div className="flex justify-between items-center mt-1">
             <small className="text-gray-500">This explanation will help students understand the concept</small>
