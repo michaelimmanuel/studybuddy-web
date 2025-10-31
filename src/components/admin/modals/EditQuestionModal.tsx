@@ -18,6 +18,7 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
   const [questionText, setQuestionText] = useState("");
   const [questionExplanation, setQuestionExplanation] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [explanationImageUrl, setExplanationImageUrl] = useState("");
   const [answers, setAnswers] = useState<AnswerForm[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -27,6 +28,7 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
       setQuestionText(question.text);
       setQuestionExplanation(question.explanation || "");
       setImageUrl(question.imageUrl || "");
+      setExplanationImageUrl(question.explanationImageUrl || "");
       setAnswers(question.answers.map(answer => ({
         text: answer.text,
         isCorrect: answer.isCorrect || false
@@ -38,6 +40,7 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
     setQuestionText("");
     setQuestionExplanation("");
     setImageUrl("");
+    setExplanationImageUrl("");
     setAnswers([]);
     setErrors({});
     onClose();
@@ -87,7 +90,8 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
             isCorrect: answer.isCorrect
           })),
         explanation: questionExplanation.trim() || undefined,
-        imageUrl: imageUrl.trim() || undefined
+        imageUrl: imageUrl.trim() || undefined,
+        explanationImageUrl: explanationImageUrl.trim() || undefined
       };
 
       const response = await api.put<UpdateQuestionResponse>(`/api/questions/${question.id}`, updateData);
@@ -237,6 +241,16 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
           folder="questions"
           label="Question Image (Optional)"
           buttonText="Upload Image"
+        />
+
+        {/* Explanation Image Upload */}
+        <ImageUpload
+          onUploadComplete={(url) => setExplanationImageUrl(url)}
+          onUploadError={(error) => setErrors({ ...errors, explanationImageUrl: error })}
+          currentImageUrl={explanationImageUrl}
+          folder="explanations"
+          label="Explanation Image (Optional)"
+          buttonText="Upload Explanation Image"
         />
 
         {errors.general && (

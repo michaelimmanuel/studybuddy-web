@@ -26,6 +26,7 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
   const [questionText, setQuestionText] = useState("");
   const [questionExplanation, setQuestionExplanation] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [explanationImageUrl, setExplanationImageUrl] = useState("");
   const [answers, setAnswers] = useState<AnswerForm[]>([
     { text: "", isCorrect: false },
     { text: "", isCorrect: false },
@@ -40,6 +41,7 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
     setQuestionText("");
     setQuestionExplanation("");
     setImageUrl("");
+    setExplanationImageUrl("");
     setAnswers([
       { text: "", isCorrect: false },
       { text: "", isCorrect: false },
@@ -95,7 +97,8 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
             isCorrect: answer.isCorrect
           })),
         explanation: questionExplanation.trim() || undefined,
-        imageUrl: imageUrl.trim() || undefined
+        imageUrl: imageUrl.trim() || undefined,
+        explanationImageUrl: explanationImageUrl.trim() || undefined
       };
 
       const response = await api.post<CreateQuestionResponse>(`/api/courses/${course.id}/questions`, questionData);
@@ -245,6 +248,16 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
           folder="questions"
           label="Question Image (Optional)"
           buttonText="Upload Image"
+        />
+
+        {/* Explanation Image Upload */}
+        <ImageUpload
+          onUploadComplete={(url) => setExplanationImageUrl(url)}
+          onUploadError={(error) => setErrors({ ...errors, explanationImageUrl: error })}
+          currentImageUrl={explanationImageUrl}
+          folder="explanations"
+          label="Explanation Image (Optional)"
+          buttonText="Upload Explanation Image"
         />
 
         {errors.general && (

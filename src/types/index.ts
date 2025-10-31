@@ -161,6 +161,7 @@ export interface Question {
   answers: Answer[];
   explanation?: string; // Single explanation per question, only visible to admins
   imageUrl?: string; // Optional image associated with the question
+  explanationImageUrl?: string; // Optional image for the explanation
   course?: {
     id: string;
     title: string;
@@ -194,6 +195,7 @@ export interface CreateQuestionRequest {
   }[];
   explanation?: string; // Single explanation per question (0-1000 characters)
   imageUrl?: string; // Optional image URL
+  explanationImageUrl?: string; // Optional explanation image URL
 }
 
 export interface CreateQuestionResponse {
@@ -209,6 +211,7 @@ export interface UpdateQuestionRequest {
   }[];
   explanation?: string; // Single explanation per question (0-1000 characters)
   imageUrl?: string; // Optional image URL
+  explanationImageUrl?: string; // Optional explanation image URL
 }
 
 export interface UpdateQuestionResponse {
@@ -237,6 +240,7 @@ export interface QuestionForm {
   answers: AnswerForm[];
   explanation?: string; // Single explanation per question
   imageUrl?: string; // Optional image URL
+  explanationImageUrl?: string; // Optional explanation image URL
 }
 
 // Package Types

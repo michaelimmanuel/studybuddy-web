@@ -85,6 +85,17 @@ export default function ExplanationModal({ isOpen, question, onClose }: Explanat
               <h4 className="font-medium text-blue-900">Explanation:</h4>
             </div>
             <p className="text-blue-800 whitespace-pre-wrap leading-relaxed">{question.explanation}</p>
+            
+            {/* Explanation Image */}
+            {question.explanationImageUrl && (
+              <div className="mt-4">
+                <img 
+                  src={question.explanationImageUrl} 
+                  alt="Explanation diagram" 
+                  className="max-w-full h-auto rounded-lg border border-blue-300"
+                />
+              </div>
+            )}
           </div>
         ) : (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">

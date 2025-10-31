@@ -251,6 +251,17 @@ export default function QuizResultsPage() {
                     <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <h4 className="font-medium text-blue-900 mb-2">Explanation:</h4>
                       <p className="text-blue-800 text-sm">{question.explanation}</p>
+                      
+                      {question.explanationImageUrl && (
+                        <div className="mt-3">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={question.explanationImageUrl}
+                            alt="Explanation diagram"
+                            className="max-h-64 rounded-lg border border-blue-300"
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
