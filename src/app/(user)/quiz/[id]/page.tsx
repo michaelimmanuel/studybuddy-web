@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import Button from "@/components/Button";
+import RichText from "@/components/RichText";
 import api from "@/lib/api";
 import type { Package, Question, SubmitQuizAttemptResponse, GetMyAttemptsResponse } from "@/types";
 
@@ -261,7 +262,7 @@ export default function QuizPage() {
             <div className="mb-6">
               <div className="flex items-start justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900 flex-1">
-                  {currentQuestion.text}
+                  <RichText html={currentQuestion.text} />
                 </h2>
                 <span className="ml-4 px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full flex-shrink-0">
                   Q{quizState.currentIndex + 1}
@@ -303,7 +304,7 @@ export default function QuizPage() {
                     <span className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium mr-3 flex-shrink-0">
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span className="text-gray-900">{answer.text}</span>
+                    <RichText className="text-gray-900" html={answer.text} />
                   </div>
                 </label>
               ))}
