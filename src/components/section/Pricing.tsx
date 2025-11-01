@@ -2,7 +2,7 @@ import React from 'react'
 
 const Pricing = () => {
   return (
-    <section className="py-12 px-4 md:px-48 bg-gradient-to-b from-[#002644] to-[#005FAA]">
+    <section id="pricing" className="py-12 px-4 md:px-48 bg-gradient-to-b from-[#002644] to-[#005FAA]">
       <h2 className="text-3xl font-bold mb-6 text-center text-white">Pricing</h2>
       <div className="flex flex-col gap-8 w-8/12 mx-auto">
 

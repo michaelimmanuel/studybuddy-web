@@ -2,7 +2,7 @@ import React from 'react'
 
 const Contact = () => {
   return (
-    <section className="flex flex-col md:flex-row items-center justify-between py-12 px-48">
+    <section id="contact" className="flex flex-col md:flex-row items-center justify-between py-12 px-48">
       {/* Left: Image (2/3) */}
       <div className="w-full md:w-2/3 flex justify-center mb-8 md:mb-0">
         <img

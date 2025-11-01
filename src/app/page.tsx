@@ -5,10 +5,12 @@ import Pricing from "@/components/section/Pricing";
 import Review from "@/components/section/Review";
 import Stats from "@/components/section/Stats";
 import Contact from "@/components/section/Contact";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
   return (
     <>
+      <Navbar />
       <Hero />
       <About />
       <div className="h-48 bg-[#002644]"></div>

@@ -21,7 +21,7 @@ const defaultItems: FaqItem[] = [
 
 export function FAQSection({ items = defaultItems }: { items?: FaqItem[] }) {
   return (
-    <section aria-labelledby="faq-heading" className="mx-auto max-w-5xl rounded-2xl bg-muted p-6 md:p-10">
+    <section id="faq" aria-labelledby="faq-heading" className="mx-auto max-w-5xl rounded-2xl bg-muted p-6 md:p-10">
       <header className="text-center">
         <h2 id="faq-heading" className="text-balance text-3xl font-semibold text-green md:text-4xl">
           FAQ

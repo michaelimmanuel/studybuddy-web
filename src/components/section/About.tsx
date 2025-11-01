@@ -2,7 +2,7 @@ import React from 'react'
 
 const About = () => {
   return (
-    <section className="flex flex-col md:flex-row items-center justify-between py-12 px-48 bg-gradient-to-b from-[#005FAA] to-[#002644] text-white">
+    <section id="about" className="flex flex-col md:flex-row items-center justify-between py-12 px-48 bg-gradient-to-b from-[#005FAA] to-[#002644] text-white">
       {/* Left: Image */}
       <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
         <img

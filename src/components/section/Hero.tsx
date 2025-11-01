@@ -3,7 +3,7 @@ import Button from '../Button'
 
 const Hero = () => {
   return (
-    <section className="flex h-[80vh] p-48 bg-gradient-to-b from-[#002644] to-[#005FAA] text-white items-center justify-between font-sans">
+    <section className="flex h-[80vh] pt-16 p-48 bg-gradient-to-b from-[#002644] to-[#005FAA] text-white items-center justify-between font-sans">
       <div className="flex-1 flex-row items-center justify-center">
         <h1 className='text-6xl font-bold mb-12'>Menemani Belajar <br /> 
         <span className='text-transparent [-webkit-text-stroke:_2px_#fff]'>Kapan Pun Dimanapun</span>

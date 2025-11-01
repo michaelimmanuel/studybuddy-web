@@ -24,7 +24,7 @@ const Review = () => {
     }
 
   return (
-    <section className="bg-gradient-to-b from-[#005FAA]/[0.79] to-[#FFFCFC]">
+    <section id="review" className="bg-gradient-to-b from-[#005FAA]/[0.79] to-[#FFFCFC]">
         <div
           className="mx-auto max-w-[80vw] rounded-2xl p-6 md:p-8 lg:p-10 bg-[#005FA9]"
           
