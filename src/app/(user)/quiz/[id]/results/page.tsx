@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import Button from "@/components/Button";
+import RichText from "@/components/RichText";
 import api from "@/lib/api";
 import type { Package, Question } from "@/types";
 
@@ -181,7 +182,7 @@ export default function QuizResultsPage() {
               <div key={question.id} className="border-b pb-4 last:border-b-0">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-semibold text-gray-900">
-                    Question {index + 1}: {question.text}
+                    Question {index + 1}: <RichText html={question.text} />
                   </h3>
                 </div>
                 
@@ -199,7 +200,7 @@ export default function QuizResultsPage() {
                 <div className="text-sm text-gray-600 ml-4">
                   {question.answers.map((answer, aIndex) => (
                     <div key={answer.id} className="py-1">
-                      {String.fromCharCode(65 + aIndex)}. {answer.text}
+                      {String.fromCharCode(65 + aIndex)}. <RichText html={answer.text} />
                       {answer.isCorrect && <span className="ml-2 text-green-600 font-medium">✓ Correct</span>}
                     </div>
                   ))}
@@ -208,7 +209,7 @@ export default function QuizResultsPage() {
                 {question.explanation && (
                   <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-sm text-blue-900">
-                      <strong>Explanation:</strong> {question.explanation}
+                      <strong>Explanation:</strong> <RichText html={question.explanation} />
                     </p>
                   </div>
                 )}

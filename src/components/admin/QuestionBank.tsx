@@ -3,6 +3,7 @@
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Card } from "@/components/ui/card";
 import Button from "@/components/Button";
+import RichText from "@/components/RichText";
 import EditQuestionModal from "./modals/EditQuestionModal";
 import ExplanationModal from "./modals/ExplanationModal";
 import type { Question, GetCourseQuestionsResponse } from "@/types";
@@ -164,7 +165,9 @@ const QuestionBank = forwardRef<QuestionBankRef, QuestionBankProps>(({ course, o
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="mb-3">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">{question.text}</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                        <RichText html={question.text} />
+                      </h4>
                       {question.imageUrl && (
                         <div className="mt-2">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -181,7 +184,7 @@ const QuestionBank = forwardRef<QuestionBankRef, QuestionBankProps>(({ course, o
                             <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium">
                               {String.fromCharCode(65 + index)}
                             </span>
-                            <span className="text-gray-700">{answer.text}</span>
+                            <RichText className="text-gray-700" html={answer.text} />
                             {userRole === 'admin' && answer.isCorrect && (
                               <span className="text-green-600 text-xs">✓ Correct</span>
                             )}

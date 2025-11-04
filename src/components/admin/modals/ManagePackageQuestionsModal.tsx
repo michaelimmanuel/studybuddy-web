@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
 import Button from "@/components/Button";
+import RichText from "@/components/RichText";
 import api from "@/lib/api";
 import type { 
   Package, 
@@ -326,13 +327,14 @@ export default function ManagePackageQuestionsModal({
                               {pq.question.course?.title}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-900 mt-1">
-                            {pq.question.text}
-                          </p>
+                          <div className="text-sm text-gray-900 mt-1">
+                            <RichText html={pq.question.text} />
+                          </div>
                           {pq.question.explanation && (
-                            <p className="text-xs text-gray-600 mt-1">
-                              Explanation: {pq.question.explanation}
-                            </p>
+                            <div className="text-xs text-gray-600 mt-1">
+                              <span className="font-medium">Explanation: </span>
+                              <RichText html={pq.question.explanation} />
+                            </div>
                           )}
                           <div className="text-xs text-gray-500 mt-1">
                             {pq.question.answers?.length || 0} answers
@@ -504,13 +506,14 @@ export default function ManagePackageQuestionsModal({
                                 {question.course?.title}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-900 mt-1">
-                              {question.text}
-                            </p>
+                            <div className="text-sm text-gray-900 mt-1">
+                              <RichText html={question.text} />
+                            </div>
                             {question.explanation && (
-                              <p className="text-xs text-gray-600 mt-1">
-                                Explanation: {question.explanation}
-                              </p>
+                              <div className="text-xs text-gray-600 mt-1">
+                                <span className="font-medium">Explanation: </span>
+                                <RichText html={question.explanation} />
+                              </div>
                             )}
                             <div className="text-xs text-gray-500 mt-1">
                               {question.answers?.length || 0} answers
