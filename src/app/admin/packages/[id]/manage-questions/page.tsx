@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
+import RichText from "@/components/RichText";
 import api from "@/lib/api";
 import type { Package, Question, Course } from "@/types";
 
@@ -179,7 +180,9 @@ export default function ManagePackageQuestionsPage({ params }: { params: { id: s
                         );
                       }}
                     />
-                    <span className="flex-1 font-medium">{pq.question.text}</span>
+                    <div className="flex-1 font-medium">
+                      <RichText html={pq.question.text} />
+                    </div>
                   </div>
                   {pq.question.answers && pq.question.answers.length > 0 && (
                     <ul className="ml-8 mt-2 space-y-1">
@@ -191,7 +194,7 @@ export default function ManagePackageQuestionsPage({ params }: { params: { id: s
                           <span className="w-6 text-xs text-center">
                             {ans.isCorrect ? "✔" : String.fromCharCode(65 + idx)}
                           </span>
-                          <span>{ans.text}</span>
+                          <RichText html={ans.text} />
                         </li>
                       ))}
                     </ul>
@@ -305,7 +308,9 @@ export default function ManagePackageQuestionsPage({ params }: { params: { id: s
                       );
                     }}
                   />
-                  <span className="flex-1">{q.text}</span>
+                  <div className="flex-1">
+                    <RichText html={q.text} />
+                  </div>
                 </li>
               ))}
             </ul>
