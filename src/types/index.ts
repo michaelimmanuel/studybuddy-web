@@ -394,6 +394,7 @@ export interface PackagePurchase {
   pricePaid: number;
   purchasedAt: string;
   expiresAt?: string | null;
+  approved: boolean; // Admin approval status
   package?: { id: string; title: string; price: number };
 }
 
@@ -404,6 +405,7 @@ export interface BundlePurchase {
   pricePaid: number;
   purchasedAt: string;
   expiresAt?: string | null;
+  approved: boolean; // Admin approval status
   bundle?: { id: string; title: string; price: number };
 }
 

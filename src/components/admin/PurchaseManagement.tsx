@@ -47,6 +47,7 @@ export default function AdminPurchaseManagement() {
   const [bundles, setBundles] = useState<BundlePurchase[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('all');
 
   const fetchPurchases = async () => {
     setLoading(true);
@@ -84,7 +85,29 @@ export default function AdminPurchaseManagement() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Purchase Management</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Purchase Management</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-4 py-2 rounded ${filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setFilter('pending')}
+            className={`px-4 py-2 rounded ${filter === 'pending' ? 'bg-yellow-600 text-white' : 'bg-gray-200'}`}
+          >
+            Pending ({[...packages, ...bundles].filter(p => !p.approved).length})
+          </button>
+          <button
+            onClick={() => setFilter('approved')}
+            className={`px-4 py-2 rounded ${filter === 'approved' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
+          >
+            Approved
+          </button>
+        </div>
+      </div>
       {error && <div className="text-red-600 mb-4">{error}</div>}
       {loading ? (
         <div>Loading...</div>
@@ -104,13 +127,21 @@ export default function AdminPurchaseManagement() {
                 </tr>
               </thead>
               <tbody>
-                {packages.map((p) => (
+                {packages
+                  .filter(p => filter === 'all' || (filter === 'pending' && !p.approved) || (filter === 'approved' && p.approved))
+                  .map((p) => (
                   <tr key={p.id} className={p.approved ? "" : "bg-yellow-50"}>
                     <td className="p-2 border">{p.user.name} <br /><span className="text-xs text-gray-500">{p.user.email}</span></td>
                     <td className="p-2 border">{p.package.title}</td>
                     <td className="p-2 border">{p.pricePaid}</td>
                     <td className="p-2 border">{new Date(p.purchasedAt).toLocaleString()}</td>
-                    <td className="p-2 border">{p.approved ? "Yes" : "No"}</td>
+                    <td className="p-2 border">
+                      {p.approved ? (
+                        <span className="text-green-600 font-semibold">✓ Approved</span>
+                      ) : (
+                        <span className="text-yellow-600 font-semibold">⏳ Pending</span>
+                      )}
+                    </td>
                     <td className="p-2 border space-x-1">
                       <Button size="sm" disabled={actionLoading === `package-${p.id}-approve` || p.approved} onClick={() => handleAction("package", p.id, "approve")}>Approve</Button>
                       <Button size="sm" disabled={actionLoading === `package-${p.id}-revoke` || !p.approved} onClick={() => handleAction("package", p.id, "revoke")} variant="secondary">Revoke</Button>
@@ -136,13 +167,21 @@ export default function AdminPurchaseManagement() {
                 </tr>
               </thead>
               <tbody>
-                {bundles.map((b) => (
+                {bundles
+                  .filter(b => filter === 'all' || (filter === 'pending' && !b.approved) || (filter === 'approved' && b.approved))
+                  .map((b) => (
                   <tr key={b.id} className={b.approved ? "" : "bg-yellow-50"}>
                     <td className="p-2 border">{b.user.name} <br /><span className="text-xs text-gray-500">{b.user.email}</span></td>
                     <td className="p-2 border">{b.bundle.title}</td>
                     <td className="p-2 border">{b.pricePaid}</td>
                     <td className="p-2 border">{new Date(b.purchasedAt).toLocaleString()}</td>
-                    <td className="p-2 border">{b.approved ? "Yes" : "No"}</td>
+                    <td className="p-2 border">
+                      {b.approved ? (
+                        <span className="text-green-600 font-semibold">✓ Approved</span>
+                      ) : (
+                        <span className="text-yellow-600 font-semibold">⏳ Pending</span>
+                      )}
+                    </td>
                     <td className="p-2 border space-x-1">
                       <Button size="sm" disabled={actionLoading === `bundle-${b.id}-approve` || b.approved} onClick={() => handleAction("bundle", b.id, "approve")}>Approve</Button>
                       <Button size="sm" disabled={actionLoading === `bundle-${b.id}-revoke` || !b.approved} onClick={() => handleAction("bundle", b.id, "revoke")} variant="secondary">Revoke</Button>

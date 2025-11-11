@@ -155,6 +155,21 @@ export default function DashboardPage() {
                 )}
               </div>
 
+              {/* Show pending approvals notice */}
+              {bundlePurchases.some(b => !b.approved) && (
+                <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">⏳</div>
+                    <div>
+                      <p className="font-semibold text-yellow-800">Pending Approval</p>
+                      <p className="text-sm text-yellow-700 mt-1">
+                        You have {bundlePurchases.filter(b => !b.approved).length} bundle purchase{bundlePurchases.filter(b => !b.approved).length > 1 ? 's' : ''} waiting for admin approval. You'll be able to access the content once confirmed.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {purchasedBundles.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                   <div className="text-4xl mb-3">📦</div>
@@ -293,6 +308,22 @@ export default function DashboardPage() {
                     <p className="text-sm text-gray-500">Packages purchased separately</p>
                   </div>
                 </div>
+
+                {/* Show pending approvals notice */}
+                {pkgPurchases.some(p => !p.approved) && (
+                  <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">⏳</div>
+                      <div>
+                        <p className="font-semibold text-yellow-800">Pending Approval</p>
+                        <p className="text-sm text-yellow-700 mt-1">
+                          You have {pkgPurchases.filter(p => !p.approved).length} package purchase{pkgPurchases.filter(p => !p.approved).length > 1 ? 's' : ''} waiting for admin approval.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-3">
                   {pkgPurchases.map(p => {
                     const attempt = getPackageAttempt(p.packageId);
@@ -318,12 +349,10 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3 flex-shrink-0">
-                          {"approved" in p && (
-                            <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${(p as any).approved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                              {(p as any).approved ? "✓ Active" : "⏳ Pending"}
-                            </span>
-                          )}
-                          {p.package && (
+                          <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${p.approved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            {p.approved ? "✓ Active" : "⏳ Pending"}
+                          </span>
+                          {p.approved && p.package && (
                             attempt ? (
                               <Button 
                                 onClick={() => router.push(`/quiz/${p.packageId}/results/${attempt.id}`)}

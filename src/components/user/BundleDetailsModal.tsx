@@ -25,8 +25,12 @@ export default function BundleDetailsModal({ open, onClose, bundle }: BundleDeta
     setError(null);
     setSuccess(false);
     try {
-      await api.post("/api/purchases/bundle", { bundleId: bundle.id });
+      const response = await api.post("/api/purchases/bundle", { bundleId: bundle.id });
       setSuccess(true);
+      // Show the message from server about approval requirement
+      if (response?.message) {
+        setError(null); // Clear any previous errors
+      }
     } catch (err: any) {
       setError(err?.message || "Failed to purchase bundle");
     } finally {
@@ -57,10 +61,15 @@ export default function BundleDetailsModal({ open, onClose, bundle }: BundleDeta
           </ul>
         </div>
         {error && <div className="text-red-600 text-sm">{error}</div>}
-        {success && <div className="text-green-600 text-sm">Purchase successful!</div>}
+        {success && (
+          <div className="bg-green-50 border border-green-200 rounded p-3 text-sm text-green-800">
+            <p className="font-semibold">Purchase request submitted successfully!</p>
+            <p className="mt-1">Please wait for admin approval. You'll be able to access the content once your payment is confirmed.</p>
+          </div>
+        )}
         <div className="flex justify-end pt-2">
           <Button className="bg-blue-600 text-white" onClick={handlePurchase} loading={loading} disabled={success}>
-            {success ? "Purchased" : "Purchase Bundle"}
+            {success ? "Request Submitted" : "Purchase Bundle"}
           </Button>
         </div>
       </div>
