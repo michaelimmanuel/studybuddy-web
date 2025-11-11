@@ -77,12 +77,14 @@ export default function DashboardPage() {
 
   async function handleLogout() {
     try {
-      await api.del("/api/auth/logout");
+      // Better Auth uses /sign-out endpoint
+      await api.post("/api/auth/sign-out", {});
     } catch (err) {
-      // ignore errors on logout
+      console.error("Logout error:", err);
+      // Continue with logout even if API call fails
     }
     clearToken();
-    router.push("/login");
+    router.push("/");
   }
 
   const toggleBundle = (bundleId: string) => {

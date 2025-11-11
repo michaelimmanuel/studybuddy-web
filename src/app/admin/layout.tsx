@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "@/lib/api";
+import api, { clearToken } from "@/lib/api";
 
 export default function AdminLayout({
   children,
@@ -96,12 +96,14 @@ export default function AdminLayout({
               <button
                 onClick={async () => {
                   try {
-                    await api.del("/api/auth/logout");
-                  } catch {
-                    // ignore errors on logout
+                    // Better Auth uses /sign-out endpoint
+                    await api.post("/api/auth/sign-out", {});
+                  } catch (err) {
+                    console.error("Logout error:", err);
+                    // Continue with logout even if API call fails
                   }
-                  localStorage.removeItem("token");
-                  router.push("/login");
+                  clearToken();
+                  router.push("/");
                 }}
                 className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
               >
@@ -145,6 +147,12 @@ export default function AdminLayout({
               className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
             >
               Bundles
+            </button>
+            <button
+              onClick={() => router.push("/admin/purchases")}
+              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
+            >
+              Purchases
             </button>
             <button
               onClick={() => router.push("/admin/analytics")}
