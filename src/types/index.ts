@@ -395,6 +395,7 @@ export interface PackagePurchase {
   purchasedAt: string;
   expiresAt?: string | null;
   approved: boolean; // Admin approval status
+  proofImageUrl?: string | null; // Transaction proof image URL
   package?: { id: string; title: string; price: number };
 }
 
@@ -406,6 +407,7 @@ export interface BundlePurchase {
   purchasedAt: string;
   expiresAt?: string | null;
   approved: boolean; // Admin approval status
+  proofImageUrl?: string | null; // Transaction proof image URL
   bundle?: { id: string; title: string; price: number };
 }
 

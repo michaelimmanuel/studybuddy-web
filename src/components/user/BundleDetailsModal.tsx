@@ -1,6 +1,7 @@
 "use client";
 import Modal from "@/components/admin/modals/Modal";
 import Button from "@/components/Button";
+import ImageUpload from "@/components/ImageUpload";
 import { formatIDR } from "@/lib/utils";
 import type { Bundle } from "@/types";
 import api from "@/lib/api";
@@ -17,15 +18,24 @@ export default function BundleDetailsModal({ open, onClose, bundle }: BundleDeta
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [proofImageUrl, setProofImageUrl] = useState<string>("");
 
   if (!bundle) return null;
 
   const handlePurchase = async () => {
+    if (!proofImageUrl) {
+      setError("Please upload a transaction proof image");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(false);
     try {
-      const response = await api.post("/api/purchases/bundle", { bundleId: bundle.id });
+      const response = await api.post("/api/purchases/bundle", { 
+        bundleId: bundle.id,
+        proofImageUrl 
+      });
       setSuccess(true);
       // Show the message from server about approval requirement
       if (response?.message) {
@@ -38,8 +48,17 @@ export default function BundleDetailsModal({ open, onClose, bundle }: BundleDeta
     }
   };
 
+  const handleModalClose = () => {
+    if (!loading) {
+      setProofImageUrl("");
+      setError(null);
+      setSuccess(false);
+      onClose();
+    }
+  };
+
   return (
-    <Modal isOpen={open} onClose={onClose} title={bundle.title}>
+    <Modal isOpen={open} onClose={handleModalClose} title={bundle.title}>
       <div className="space-y-4">
         <div className="text-gray-700 text-base">{bundle.description}</div>
         <div className="flex items-center gap-4">
@@ -60,17 +79,44 @@ export default function BundleDetailsModal({ open, onClose, bundle }: BundleDeta
             )}
           </ul>
         </div>
-        {error && <div className="text-red-600 text-sm">{error}</div>}
+
+        {!success && (
+          <div className="border-t pt-4">
+            <ImageUpload
+              onUploadComplete={setProofImageUrl}
+              onUploadError={(err) => setError(err)}
+              currentImageUrl={proofImageUrl}
+              folder="payment-proofs"
+              label="Transaction Proof"
+              buttonText="Upload Payment Proof"
+              maxSizeMB={5}
+            />
+          </div>
+        )}
+
+        {error && <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded p-3">{error}</div>}
         {success && (
           <div className="bg-green-50 border border-green-200 rounded p-3 text-sm text-green-800">
             <p className="font-semibold">Purchase request submitted successfully!</p>
             <p className="mt-1">Please wait for admin approval. You'll be able to access the content once your payment is confirmed.</p>
           </div>
         )}
-        <div className="flex justify-end pt-2">
-          <Button className="bg-blue-600 text-white" onClick={handlePurchase} loading={loading} disabled={success}>
-            {success ? "Request Submitted" : "Purchase Bundle"}
-          </Button>
+        <div className="flex justify-end gap-2 pt-2">
+          {!success && (
+            <>
+              <Button variant="outline" onClick={handleModalClose} disabled={loading}>
+                Cancel
+              </Button>
+              <Button className="bg-blue-600 text-white" onClick={handlePurchase} loading={loading}>
+                Submit Purchase Request
+              </Button>
+            </>
+          )}
+          {success && (
+            <Button className="bg-green-600 text-white" onClick={handleModalClose}>
+              Close
+            </Button>
+          )}
         </div>
       </div>
     </Modal>

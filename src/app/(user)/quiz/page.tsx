@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import Button from "@/components/Button";
+import PurchasePackageModal from "@/components/user/PurchasePackageModal";
 import api from "@/lib/api";
 import type { Package } from "@/types";
 
@@ -12,6 +13,9 @@ export default function QuizPackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [purchaseOpen, setPurchaseOpen] = useState(false);
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
+  const [selectedPackageTitle, setSelectedPackageTitle] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     fetchPackages();
@@ -139,19 +143,35 @@ export default function QuizPackagesPage() {
                     )}
                   </div>
 
-                  <Button
-                    onClick={() => router.push(`/quiz/${pkg.id}`)}
-                    disabled={!available || questionCount === 0}
-                    className="w-full mt-4"
-                  >
-                    {questionCount === 0 ? 'No Questions' : 'Start Quiz'}
-                  </Button>
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      onClick={() => router.push(`/quiz/${pkg.id}`)}
+                      disabled={!available || questionCount === 0}
+                      className="flex-1"
+                    >
+                      {questionCount === 0 ? 'No Questions' : 'Start Quiz'}
+                    </Button>
+                    {pkg.price > 0 && (
+                      <Button
+                        variant="outline"
+                        onClick={() => { setSelectedPackageId(pkg.id); setSelectedPackageTitle(pkg.title); setPurchaseOpen(true); }}
+                      >
+                        Request Access
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </Card>
             );
           })}
         </div>
       )}
+      <PurchasePackageModal
+        open={purchaseOpen}
+        onClose={() => setPurchaseOpen(false)}
+        packageId={selectedPackageId}
+        packageTitle={selectedPackageTitle}
+      />
     </div>
   );
 }

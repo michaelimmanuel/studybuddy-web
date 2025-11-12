@@ -29,6 +29,7 @@ interface PackagePurchase {
   purchasedAt: string;
   expiresAt?: string;
   approved: boolean;
+  proofImageUrl?: string | null;
 }
 
 interface BundlePurchase {
@@ -39,6 +40,7 @@ interface BundlePurchase {
   purchasedAt: string;
   expiresAt?: string;
   approved: boolean;
+  proofImageUrl?: string | null;
 }
 
 export default function AdminPurchaseManagement() {
@@ -48,6 +50,7 @@ export default function AdminPurchaseManagement() {
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('all');
+  const [viewingProof, setViewingProof] = useState<string | null>(null);
 
   const fetchPurchases = async () => {
     setLoading(true);
@@ -122,6 +125,7 @@ export default function AdminPurchaseManagement() {
                   <th className="p-2 border">Package</th>
                   <th className="p-2 border">Price Paid</th>
                   <th className="p-2 border">Purchased At</th>
+                  <th className="p-2 border">Proof</th>
                   <th className="p-2 border">Approved</th>
                   <th className="p-2 border">Actions</th>
                 </tr>
@@ -135,6 +139,16 @@ export default function AdminPurchaseManagement() {
                     <td className="p-2 border">{p.package.title}</td>
                     <td className="p-2 border">{p.pricePaid}</td>
                     <td className="p-2 border">{new Date(p.purchasedAt).toLocaleString()}</td>
+                    <td className="p-2 border text-center">
+                      {p.proofImageUrl ? (
+                        <button
+                          onClick={() => setViewingProof(p.proofImageUrl!)}
+                          className="text-blue-600 hover:text-blue-800 underline text-xs"
+                        >View</button>
+                      ) : (
+                        <span className="text-gray-400 text-xs">None</span>
+                      )}
+                    </td>
                     <td className="p-2 border">
                       {p.approved ? (
                         <span className="text-green-600 font-semibold">✓ Approved</span>
@@ -162,6 +176,7 @@ export default function AdminPurchaseManagement() {
                   <th className="p-2 border">Bundle</th>
                   <th className="p-2 border">Price Paid</th>
                   <th className="p-2 border">Purchased At</th>
+                  <th className="p-2 border">Proof</th>
                   <th className="p-2 border">Approved</th>
                   <th className="p-2 border">Actions</th>
                 </tr>
@@ -175,6 +190,16 @@ export default function AdminPurchaseManagement() {
                     <td className="p-2 border">{b.bundle.title}</td>
                     <td className="p-2 border">{b.pricePaid}</td>
                     <td className="p-2 border">{new Date(b.purchasedAt).toLocaleString()}</td>
+                    <td className="p-2 border text-center">
+                      {b.proofImageUrl ? (
+                        <button
+                          onClick={() => setViewingProof(b.proofImageUrl!)}
+                          className="text-blue-600 hover:text-blue-800 underline text-xs"
+                        >View</button>
+                      ) : (
+                        <span className="text-gray-400 text-xs">None</span>
+                      )}
+                    </td>
                     <td className="p-2 border">
                       {b.approved ? (
                         <span className="text-green-600 font-semibold">✓ Approved</span>
@@ -192,6 +217,32 @@ export default function AdminPurchaseManagement() {
               </tbody>
             </table>
           </div>
+          {viewingProof && (
+            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setViewingProof(null)}>
+              <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-4 relative" onClick={e => e.stopPropagation()}>
+                <button
+                  className="absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 rounded-full p-2"
+                  onClick={() => setViewingProof(null)}
+                  aria-label="Close"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <h3 className="text-lg font-semibold mb-3">Transaction Proof</h3>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={viewingProof} alt="Transaction Proof" className="w-full h-auto rounded border" />
+                <div className="mt-4 flex justify-end">
+                  <a
+                    href={viewingProof}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  >Open Original</a>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
