@@ -109,8 +109,27 @@ export default function PurchasePackageModal({ open, onClose, packageId, package
         )}
 
         {!success && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm text-yellow-800">
-            Upload a clear screenshot or photo of your payment transaction as proof. An admin will review and approve your access.
+          <div className="bg-blue-50 border border-blue-200 rounded p-4">
+            <h3 className="font-semibold text-blue-900 mb-3">Payment Instructions:</h3>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="/img/QR.jpg" 
+                  alt="Payment QR Code" 
+                  className="w-48 h-48 object-contain border-2 border-gray-300 rounded-lg bg-white"
+                />
+              </div>
+              <div className="flex-1 text-sm text-gray-700">
+                <ol className="list-decimal list-inside space-y-2">
+                  <li>Scan the QR code or transfer to the account shown</li>
+                  <li>Transfer amount: <strong>Rp {finalPrice.toLocaleString()}</strong></li>
+                  <li>Take a screenshot of your payment confirmation</li>
+                  <li>Upload the proof below</li>
+                  <li>Wait for admin approval (within 24 hours)</li>
+                </ol>
+              </div>
+            </div>
           </div>
         )}
 
