@@ -16,6 +16,7 @@ export default function QuizPackagesPage() {
   const [purchaseOpen, setPurchaseOpen] = useState(false);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [selectedPackageTitle, setSelectedPackageTitle] = useState<string | undefined>(undefined);
+  const [selectedPackagePrice, setSelectedPackagePrice] = useState<number>(0);
 
   useEffect(() => {
     fetchPackages();
@@ -154,7 +155,7 @@ export default function QuizPackagesPage() {
                     {pkg.price > 0 && (
                       <Button
                         variant="outline"
-                        onClick={() => { setSelectedPackageId(pkg.id); setSelectedPackageTitle(pkg.title); setPurchaseOpen(true); }}
+                        onClick={() => { setSelectedPackageId(pkg.id); setSelectedPackageTitle(pkg.title); setSelectedPackagePrice(pkg.price); setPurchaseOpen(true); }}
                       >
                         Request Access
                       </Button>
@@ -171,6 +172,7 @@ export default function QuizPackagesPage() {
         onClose={() => setPurchaseOpen(false)}
         packageId={selectedPackageId}
         packageTitle={selectedPackageTitle}
+        packagePrice={selectedPackagePrice}
       />
     </div>
   );
