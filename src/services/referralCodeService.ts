@@ -12,7 +12,23 @@ import type {
 export const referralCodeService = {
   // PUBLIC: Validate a referral code
   validate: async (code: string): Promise<ValidateReferralCodeResponse> => {
-    return api.post('/api/referral-codes/validate', { code });
+    const response: any = await api.post('/api/referral-codes/validate', { code });
+    
+    // Map backend response format to frontend type
+    return {
+      valid: response.valid || false,
+      message: response.message,
+      referralCode: response.data ? {
+        ...response.data,
+        id: '', // Not returned by validation endpoint
+        quota: 0, // Not returned
+        usedCount: 0, // Not returned
+        isActive: true, // Must be true if validation passed
+        expiresAt: null, // Not returned
+        createdAt: '', // Not returned
+        createdBy: '' // Not returned
+      } : undefined
+    };
   },
 
   // ADMIN: List all referral codes
