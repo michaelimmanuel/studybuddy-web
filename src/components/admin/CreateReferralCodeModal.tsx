@@ -34,7 +34,13 @@ export default function CreateReferralCodeModal({
     setError('');
 
     try {
-      await referralCodeService.create(formData);
+      // Convert datetime-local to ISO string
+      const submitData = {
+        ...formData,
+        expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : ''
+      };
+      
+      await referralCodeService.create(submitData);
       onSuccess();
       onClose();
       // Reset form
@@ -99,7 +105,7 @@ export default function CreateReferralCodeModal({
             className="w-full px-3 py-2 border rounded-lg"
           >
             <option value="PERCENTAGE">Percentage (%)</option>
-            <option value="FIXED_AMOUNT">Fixed Amount (IDR)</option>
+            <option value="FIXED">Fixed Amount (IDR)</option>
           </select>
         </div>
 

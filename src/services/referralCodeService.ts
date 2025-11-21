@@ -29,7 +29,18 @@ export const referralCodeService = {
     }
     
     const query = queryParams.toString();
-    return api.get(`/api/referral-codes${query ? `?${query}` : ''}`);
+    const response: any = await api.get(`/api/referral-codes${query ? `?${query}` : ''}`);
+    
+    // Map backend response format to frontend type
+    const mappedCodes = (response.data || []).map((code: any) => ({
+      ...code,
+      remainingUses: code.remainingQuota ?? (code.quota - code.usedCount)
+    }));
+    
+    return {
+      referralCodes: mappedCodes,
+      pagination: response.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 }
+    };
   },
 
   // ADMIN: Get referral code by ID

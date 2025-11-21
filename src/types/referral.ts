@@ -1,6 +1,6 @@
 // types/referral.ts
 
-export type DiscountType = 'PERCENTAGE' | 'FIXED_AMOUNT';
+export type DiscountType = 'PERCENTAGE' | 'FIXED';
 
 export interface ReferralCode {
   id: string;

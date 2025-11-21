@@ -23,10 +23,12 @@ export default function ReferralCodesManagementPage() {
         limit: 20,
         isActive: filter === 'all' ? undefined : filter === 'active'
       });
-      setCodes(response.referralCodes);
-      setTotalPages(response.pagination.totalPages);
+      setCodes(response.referralCodes || []);
+      setTotalPages(response.pagination?.totalPages || 1);
     } catch (error) {
       console.error('Failed to fetch referral codes:', error);
+      setCodes([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
