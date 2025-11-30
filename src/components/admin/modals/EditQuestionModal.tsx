@@ -6,6 +6,7 @@ import Button from "@/components/Button";
 import ImageUpload from "@/components/ImageUpload";
 import type { Question, UpdateQuestionRequest, UpdateQuestionResponse, AnswerForm } from "@/types";
 import api from "@/lib/api";
+import { normalizeRichText } from "@/lib/text";
 
 interface EditQuestionModalProps {
   isOpen: boolean;
@@ -100,16 +101,19 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
     const newErrors: { [key: string]: string } = {};
 
     // Validate question text
-    if (!questionText.trim()) {
+    const qt = normalizeRichText(questionText);
+    if (!qt.plainText.trim()) {
       newErrors.questionText = "Question text is required";
-    } else if (questionText.trim().length < 10) {
+    } else if (qt.length < 10) {
       newErrors.questionText = "Question text must be at least 10 characters";
-    } else if (questionText.trim().length > 1000) {
+    } else if (qt.length > 1000) {
       newErrors.questionText = "Question text must be less than 1000 characters";
     }
 
     // Validate answers
-    const validAnswers = answers.filter(answer => answer.text.trim());
+    const validAnswers = answers
+      .map(a => ({ ...a, norm: normalizeRichText(a.text) }))
+      .filter(answer => answer.norm.plainText.trim());
     if (validAnswers.length < 2) {
       newErrors.answers = "At least 2 answers must be filled";
     }
@@ -131,15 +135,18 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
     setIsSubmitting(true);
 
     try {
+      const qtNorm = normalizeRichText(questionText);
+      const explNorm = normalizeRichText(questionExplanation);
       const updateData: UpdateQuestionRequest = {
-        text: questionText.trim(),
+        text: qtNorm.sanitizedHtml,
         answers: answers
-          .filter(answer => answer.text.trim())
+          .map(answer => ({ ...answer, norm: normalizeRichText(answer.text) }))
+          .filter(answer => answer.norm.plainText.trim())
           .map(answer => ({
-            text: answer.text.trim(),
+            text: answer.norm.sanitizedHtml,
             isCorrect: answer.isCorrect
           })),
-        explanation: questionExplanation.trim() || undefined,
+        explanation: explNorm.plainText ? explNorm.sanitizedHtml : undefined,
         imageUrl: imageUrl.trim() || undefined,
         explanationImageUrl: explanationImageUrl.trim() || undefined
       };
@@ -243,7 +250,7 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
           />
           <div className="flex justify-between items-center mt-1">
             {errors.questionText && <p className="text-red-500 text-sm">{errors.questionText}</p>}
-            <small className="text-gray-500 ml-auto">{questionText.length}/1000 characters</small>
+            <small className="text-gray-500 ml-auto">{normalizeRichText(questionText).length}/1000 characters</small>
           </div>
         </div>
 
@@ -411,7 +418,7 @@ export default function EditQuestionModal({ isOpen, question, onClose, onSuccess
           />
           <div className="flex justify-between items-center mt-1">
             <small className="text-gray-500">This explanation will help students understand the concept</small>
-            <small className="text-gray-500">{questionExplanation.length}/1000 characters</small>
+            <small className="text-gray-500">{normalizeRichText(questionExplanation).length}/1000 characters</small>
           </div>
         </div>
 

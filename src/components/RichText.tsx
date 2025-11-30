@@ -1,7 +1,7 @@
 "use client";
 
-import DOMPurify from "dompurify";
 import { useMemo } from "react";
+import { normalizeRichText } from "@/lib/text";
 
 interface RichTextProps {
   html?: string | null;
@@ -11,10 +11,7 @@ interface RichTextProps {
 export default function RichText({ html, className }: RichTextProps) {
   const sanitized = useMemo(() => {
     if (!html) return "";
-    return DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: ["b", "strong", "i", "em", "u", "br"],
-      ALLOWED_ATTR: []
-    });
+    return normalizeRichText(html).sanitizedHtml;
   }, [html]);
 
   return (
