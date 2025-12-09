@@ -1,3 +1,4 @@
+
 import DOMPurify from "dompurify";
 
 export type NormalizeResult = {
@@ -24,10 +25,32 @@ const allowedAttrs: Record<string, string[]> = {
 };
 
 /**
- * Normalize rich text for accurate character counting.
+ * Converts block-level tags and <br> to newlines, then strips tags for accurate plain text.
+ */
+function htmlToPlainTextWithBreaks(html: string): string {
+  // Replace <br> with \n
+  let text = html.replace(/<br\s*\/?>(?![^<]*>)/gi, "\n");
+  // Replace block tags with newlines
+  text = text.replace(/<(p|div|li|blockquote|h[1-6]|pre)[^>]*>/gi, "\n");
+  // Replace </li> with newline (for lists)
+  text = text.replace(/<\/li>/gi, "\n");
+  // Remove all other tags
+  text = text.replace(/<[^>]+>/g, "");
+  // Normalize whitespace and special characters
+  text = text
+    .replace(/[\u00A0]/g, " ")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\r\n|\r|\n/g, "\n") // normalize all line breaks
+    .replace(/[ \t]+/g, " ") // collapse spaces/tabs
+    .replace(/\n{2,}/g, "\n") // collapse multiple newlines
+    .trim();
+  return text;
+}
+
+/**
+ * Normalize rich text for accurate character counting and line breaks.
  * - Sanitizes HTML with the same tag/attr policy as the server
- * - Derives plain text
- * - Normalizes whitespace, non-breaking, and zero-width characters
+ * - Derives plain text, preserving line breaks
  */
 export function normalizeRichText(html: string): NormalizeResult {
   const sanitizedHtml = DOMPurify.sanitize(html, {
@@ -36,14 +59,8 @@ export function normalizeRichText(html: string): NormalizeResult {
     RETURN_TRUSTED_TYPE: false,
   });
 
-  // Strip all tags to plain text
-  const stripped = DOMPurify.sanitize(sanitizedHtml, { ALLOWED_TAGS: [], ALLOWED_ATTR: [], RETURN_TRUSTED_TYPE: false });
-
-  const plainText = stripped
-    .replace(/[\u00A0]/g, " ")
-    .replace(/[\u200B-\u200D\uFEFF]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  // Convert to plain text with line breaks
+  const plainText = htmlToPlainTextWithBreaks(sanitizedHtml);
 
   return { sanitizedHtml, plainText, length: plainText.length };
 }
