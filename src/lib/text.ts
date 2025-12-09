@@ -28,12 +28,12 @@ const allowedAttrs: Record<string, string[]> = {
  * Converts block-level tags and <br> to newlines, then strips tags for accurate plain text.
  */
 function htmlToPlainTextWithBreaks(html: string): string {
-  // Replace <br> with \n
+  // Replace <br> with single newline
   let text = html.replace(/<br\s*\/?>(?![^<]*>)/gi, "\n");
-  // Replace block tags with newlines
-  text = text.replace(/<(p|div|li|blockquote|h[1-6]|pre)[^>]*>/gi, "\n");
-  // Replace </li> with newline (for lists)
-  text = text.replace(/<\/li>/gi, "\n");
+  // Replace block tags with double newlines
+  text = text.replace(/<(p|div|li|blockquote|h[1-6]|pre)[^>]*>/gi, "\n\n");
+  // Replace </li> with double newline (for lists)
+  text = text.replace(/<\/li>/gi, "\n\n");
   // Remove all other tags
   text = text.replace(/<[^>]+>/g, "");
   // Normalize whitespace and special characters
@@ -42,7 +42,7 @@ function htmlToPlainTextWithBreaks(html: string): string {
     .replace(/[\u200B-\u200D\uFEFF]/g, "")
     .replace(/\r\n|\r|\n/g, "\n") // normalize all line breaks
     .replace(/[ \t]+/g, " ") // collapse spaces/tabs
-    .replace(/\n{2,}/g, "\n") // collapse multiple newlines
+    .replace(/\n{3,}/g, "\n\n") // collapse 3+ newlines to 2
     .trim();
   return text;
 }
