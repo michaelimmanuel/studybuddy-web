@@ -375,7 +375,7 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
         {/* Question Explanation */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Question Explanation (optional, 0-1000 characters)
+            Question Explanation (optional, 0-5000 characters)
           </label>
           <div className="flex gap-2 mb-2">
             <Button 
@@ -427,7 +427,7 @@ export default function CreateQuestionModal({ isOpen, course, onClose, onSuccess
           />
           <div className="flex justify-between items-center mt-1">
             <small className="text-gray-500">This explanation will help students understand the concept</small>
-            <small className="text-gray-500">{normalizeRichText(questionExplanation).length}/1000 characters</small>
+            <small className="text-gray-500">{normalizeRichText(questionExplanation).length}/5000 characters</small>
           </div>
         </div>
 

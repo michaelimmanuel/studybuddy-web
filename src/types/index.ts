@@ -193,7 +193,7 @@ export interface CreateQuestionRequest {
     text: string;
     isCorrect: boolean;
   }[];
-  explanation?: string; // Single explanation per question (0-1000 characters)
+  explanation?: string; // Single explanation per question (0-5000 characters)
   imageUrl?: string; // Optional image URL
   explanationImageUrl?: string; // Optional explanation image URL
 }
@@ -209,7 +209,7 @@ export interface UpdateQuestionRequest {
     text: string;
     isCorrect: boolean;
   }[];
-  explanation?: string; // Single explanation per question (0-1000 characters)
+  explanation?: string; // Single explanation per question (0-5000 characters)
   imageUrl?: string; // Optional image URL
   explanationImageUrl?: string; // Optional explanation image URL
 }
