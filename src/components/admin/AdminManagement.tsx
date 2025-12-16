@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, UserPlus, Shield, ShieldOff, Eye, EyeOff } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { api } from '@/lib/api';
+import PermissionManager from './PermissionManager';
 
 interface AdminUser {
   id: string;
@@ -21,7 +22,6 @@ interface AdminUser {
   createdAt: string;
   updatedAt: string;
 }
-
 interface AdminUsersResponse {
   adminUsers: AdminUser[];
   pagination: {
@@ -58,6 +58,8 @@ export default function AdminManagement() {
   });
 
   const { toast } = useToast();
+  const [pmOpen, setPmOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
 
   // Fetch admin users
   const fetchAdminUsers = async (page = 1) => {
@@ -158,6 +160,7 @@ export default function AdminManagement() {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -300,6 +303,16 @@ export default function AdminManagement() {
                       Joined {new Date(admin.createdAt).toLocaleDateString()}
                     </p>
                     <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedUser({ id: admin.id, name: admin.name });
+                        setPmOpen(true);
+                      }}
+                    >
+                      Permissions
+                    </Button>
+                    <Button
                       variant="outline"
                       size="sm"
                       onClick={() => revokeAdminPrivileges(admin.id, admin.name)}
@@ -341,5 +354,16 @@ export default function AdminManagement() {
         </CardContent>
       </Card>
     </div>
+      <PermissionManager
+        userId={selectedUser?.id ?? ''}
+        userName={selectedUser?.name ?? ''}
+        isOpen={pmOpen}
+        onClose={() => {
+          setPmOpen(false);
+          setSelectedUser(null);
+          fetchAdminUsers(pagination.page);
+        }}
+      />
+    </>
   );
 }

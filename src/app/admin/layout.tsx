@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import api, { clearToken } from "@/lib/api";
+import usePermissions from "@/lib/usePermissions";
 
 export default function AdminLayout({
   children,
@@ -10,40 +11,35 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+  const { permissions, loading: permsLoading } = usePermissions();
 
   useEffect(() => {
-    async function checkAdminAuth() {
+    // React to permission load state instead of polling
+    if (permsLoading) return;
+    (async () => {
       try {
-        // First check if user is authenticated
-        await api.get("/api/users/me");
-        setIsAuthenticated(true);
-
-        // Then check admin status - your endpoint returns a boolean
-        const isAdminResponse = await api.get<any>("/api/users/is-admin");
-        console.log("Admin check response:", isAdminResponse);
-        
-        if (isAdminResponse.isAdmin === true) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-          // Redirect non-admin users to their dashboard
-          router.push("/dashboard");
-        }
-      } catch (error) {
-        console.error("Admin auth check failed:", error);
-        setIsAuthenticated(false);
-        // Redirect unauthenticated users to login
-        router.push("/login");
-      } finally {
+        // Confirm there's an active session; unauthenticated -> send to login
+        await api.get('/api/users/me');
+      } catch (err) {
+        router.push('/login');
         setLoading(false);
+        return;
       }
-    }
 
-    checkAdminAuth();
-  }, [router]);
+      const hasAnyManage = (permissions || []).some((p: string) => p.endsWith('.manage'));
+      if (hasAnyManage) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+        // If no manage perms, redirect to dashboard
+        router.push('/dashboard');
+      }
+
+      setLoading(false);
+    })();
+  }, [permsLoading, permissions, router]);
 
   if (loading) {
     return (
@@ -56,9 +52,8 @@ export default function AdminLayout({
     );
   }
 
-  if (!isAuthenticated) {
-    return null; // Will redirect to login
-  }
+  // We no longer track `isAuthenticated` separately; loading handles redirects.
+  if (loading) return null;
 
   if (!isAdmin) {
     return (
@@ -118,60 +113,46 @@ export default function AdminLayout({
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
-            <button
-              onClick={() => router.push("/admin")}
-              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => router.push("/admin/users")}
-              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
-            >
-              User Management
-            </button>
-            <button
-              onClick={() => router.push("/admin/courses")}
-              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
-            >
-              Question Banks
-            </button>
-            <button
-              onClick={() => router.push("/admin/packages")}
-              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
-            >
-              Packages
-            </button>
-            <button
-              onClick={() => router.push("/admin/bundles")}
-              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
-            >
-              Bundles
-            </button>
-            <button
-              onClick={() => router.push("/admin/purchases")}
-              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
-            >
-              Purchases
-            </button>
-            <button
-              onClick={() => router.push("/admin/referral-codes")}
-              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
-            >
-              Referral Codes
-            </button>
-            <button
-              onClick={() => router.push("/admin/analytics")}
-              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
-            >
-              Analytics
-            </button>
-            <button
-              onClick={() => router.push("/admin/settings")}
-              className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
-            >
-              Settings
-            </button>
+            { (permissions || []).some((p: string) => p.endsWith('.manage')) && (
+              <button
+                onClick={() => router.push('/admin')}
+                className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600"
+              >
+                Overview
+              </button>
+            ) }
+
+            { (permissions || []).includes('users.manage') && (
+              <button onClick={() => router.push('/admin/users')} className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600">User Management</button>
+            ) }
+
+            { (permissions || []).some((p: string) => ['questions.manage','courses.manage'].includes(p)) && (
+              <button onClick={() => router.push('/admin/courses')} className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600">Question Banks</button>
+            ) }
+
+            { (permissions || []).includes('packages.manage') && (
+              <button onClick={() => router.push('/admin/packages')} className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600">Packages</button>
+            ) }
+
+            { (permissions || []).some((p: string) => ['bundles.manage','packages.manage'].includes(p)) && (
+              <button onClick={() => router.push('/admin/bundles')} className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600">Bundles</button>
+            ) }
+
+            { (permissions || []).includes('purchases.manage') && (
+              <button onClick={() => router.push('/admin/purchases')} className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600">Purchases</button>
+            ) }
+
+            { (permissions || []).includes('referral.manage') && (
+              <button onClick={() => router.push('/admin/referral-codes')} className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600">Referral Codes</button>
+            ) }
+
+            { (permissions || []).includes('system.manage') && (
+              <button onClick={() => router.push('/admin/analytics')} className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600">Analytics</button>
+            ) }
+
+            { (permissions || []).some((p: string) => ['permissions.manage','system.manage'].includes(p)) && (
+              <button onClick={() => router.push('/admin/settings')} className="py-3 px-1 border-b-2 border-transparent hover:border-blue-500 text-sm font-medium text-gray-700 hover:text-blue-600">Settings</button>
+            ) }
           </div>
         </div>
       </nav>
