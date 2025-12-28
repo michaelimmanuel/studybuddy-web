@@ -19,7 +19,7 @@ const About = () => {
         <p className="text-lg text-white text-justify">
           Kami tahu, perjalanan menuju gelar dokter gigi bukanlah hal yang mudah
           penuh tantangan, kebingungan, dan rasa lelah.
-          Di sinilah StudyBuddy hadir sebagai teman belajar yang siap membimbing Anda menghadapi perkuliahan, klinik hingga ujian UKMP2DG dengan cara yang lebih ringan, terarah, dan menyenangkan.
+          Di sinilah StudyBuddy hadir sebagai teman belajar yang siap membimbing Anda menghadapi perkuliahan, klinik hingga ujian Ukomnas-PPDG dengan cara yang lebih ringan, terarah, dan menyenangkan.
           Namun perjalanan kita tidak berhenti sampai di situ. StudyBuddy tumbuh sebagai komunitas hangat bagi calon dokter dan dokter gigi di seluruh Indonesia—sebuah ruang untuk saling belajar, berbagi pengalaman, berkonsultasi, dan menemukan dukungan. Bukan hanya seputar dunia kedokteran gigi, tetapi juga tentang tantangan nyata yang kita hadapi bersama di kehidupan sehari-hari.        </p>
         <br />
       </div>

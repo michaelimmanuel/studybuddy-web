@@ -12,7 +12,7 @@ const defaultItems: FaqItem[] = [
   {
     question: "Kenapa memilih study buddy?",
     answer:
-      "StudyBuddy adalah platform try–out kedokteran gigi terbaik yang menyediakan soal berkualitas, menyesuaikan silabus UKMP2DG. Harga yang murah dengan kualitas nomor SATU!. Menyesuaikan dengan kantong mahasiswa ya gengs!",
+      "StudyBuddy adalah platform try–out kedokteran gigi terbaik yang menyediakan soal berkualitas, menyesuaikan silabus Ukomnas-PPDG. Harga yang murah dengan kualitas nomor SATU!. Menyesuaikan dengan kantong mahasiswa ya gengs!",
   },
   { question: "Kenapa memilih study buddy?", answer: "Jawaban placeholder untuk item kedua." },
   { question: "Kenapa memilih study buddy?", answer: "Jawaban placeholder untuk item ketiga." },
