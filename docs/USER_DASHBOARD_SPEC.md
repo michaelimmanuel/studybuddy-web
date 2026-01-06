@@ -36,18 +36,7 @@ Implementation files (suggested):
   - Response: `{ user: {...}, permissions: string[] }` (existing)
 
 - GET `/api/dashboard/summary`
-  - Response:
-    ```json
-    {
-      "progressPercent": 72,
-      "avgScore": 82.3,
-      "totalQuizzes": 24,
-      "streakDays": 5,
-      "recentAttempts": [
-        {"id":"...","quizId":"...","packageId":"...","score":85,"date":"...","duration":120}
-      ]
-    }
-    ```
+  - TO BE IMPLEMENTED
 
 - GET `/api/packages` (user view)
   - Response: `[{ id, title, description, isActive, price, enrolled }]`
