@@ -213,7 +213,7 @@ export default function QuizResultsPage() {
 
                   <div className="space-y-2">
                     {question.answers?.map((ans, idx) => {
-                      const isSelected = answer.selectedAnswerId === ans.id;
+                      const isSelected = answer.selectedAnswerIds?.includes(ans.id) || false;
                       const isCorrectAnswer = ans.isCorrect;
 
                       return (

@@ -9,12 +9,17 @@ import api from "@/lib/api";
 
 interface PracticeQuestionsProps {
   courseId: string;
+  quizName?: string;
 }
 
-export default function PracticeQuestions({ courseId }: PracticeQuestionsProps) {
+export default function PracticeQuestions({ courseId, quizName }: PracticeQuestionsProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<{ [questionId: string]: string }>({});
+  // For single-answer: string; for multi-answer: string[]
+  const [selectedAnswers, setSelectedAnswers] = useState<{ [questionId: string]: string | string[] }>({});
+
+  // If quizName starts with OSCE, treat all as multi-answer
+  const isOSCE = quizName && quizName.trim().toUpperCase().startsWith('OSCE');
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,10 +42,27 @@ export default function PracticeQuestions({ courseId }: PracticeQuestionsProps) 
     fetchQuestions();
   }, [courseId]);
 
-  const handleAnswerSelect = (questionId: string, answerId: string) => {
-    setSelectedAnswers({
-      ...selectedAnswers,
-      [questionId]: answerId
+  // Detect if a question is multi-answer (more than one correct answer)
+  function isMultiAnswer(q: Question) {
+    if (isOSCE) return true;
+    return Array.isArray(q.answers) && q.answers.filter((a: any) => a.isCorrect).length > 1;
+  }
+
+  // For single-answer: set string; for multi-answer: toggle in array
+  const handleAnswerSelect = (questionId: string, answerId: string, multi: boolean) => {
+    setSelectedAnswers((prev) => {
+      if (!multi) {
+        return { ...prev, [questionId]: answerId };
+      } else {
+        const prevArr = Array.isArray(prev[questionId]) ? (prev[questionId] as string[]) : [];
+        if (prevArr.includes(answerId)) {
+          // remove
+          return { ...prev, [questionId]: prevArr.filter((id) => id !== answerId) };
+        } else {
+          // add
+          return { ...prev, [questionId]: [...prevArr, answerId] };
+        }
+      }
     });
   };
 
@@ -65,6 +87,7 @@ export default function PracticeQuestions({ courseId }: PracticeQuestionsProps) 
   };
 
   const currentQuestion = questions[currentQuestionIndex];
+  const multi = currentQuestion ? isMultiAnswer(currentQuestion) : false;
 
   if (loading) {
     return (
@@ -169,33 +192,37 @@ export default function PracticeQuestions({ courseId }: PracticeQuestionsProps) 
               <img src={currentQuestion.imageUrl} alt="Question" className="max-h-72 rounded border mx-auto" />
             </div>
           )}
-          
           <div className="space-y-3">
-            {currentQuestion.answers.map((answer, index) => (
-              <label
-                key={answer.id}
-                className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                  selectedAnswers[currentQuestion.id] === answer.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name={`question-${currentQuestion.id}`}
-                  value={answer.id}
-                  checked={selectedAnswers[currentQuestion.id] === answer.id}
-                  onChange={() => handleAnswerSelect(currentQuestion.id, answer.id)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                />
-                <div className="ml-4 flex items-center">
-                  <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium mr-3">
-                    {String.fromCharCode(65 + index)}
-                  </span>
-                  <RichText className="text-gray-900" html={answer.text} />
-                </div>
-              </label>
-            ))}
+            {currentQuestion.answers.map((answer, index) => {
+              const checked = multi
+                ? Array.isArray(selectedAnswers[currentQuestion.id]) && (selectedAnswers[currentQuestion.id] as string[]).includes(answer.id)
+                : selectedAnswers[currentQuestion.id] === answer.id;
+              return (
+                <label
+                  key={answer.id}
+                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                    checked
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <input
+                    type={multi ? 'checkbox' : 'radio'}
+                    name={`question-${currentQuestion.id}`}
+                    value={answer.id}
+                    checked={checked}
+                    onChange={() => handleAnswerSelect(currentQuestion.id, answer.id, multi)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                  />
+                  <div className="ml-4 flex items-center">
+                    <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium mr-3">
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <RichText className="text-gray-900" html={answer.text} />
+                  </div>
+                </label>
+              );
+            })}
           </div>
         </div>
 
@@ -208,7 +235,6 @@ export default function PracticeQuestions({ courseId }: PracticeQuestionsProps) 
           >
             Previous
           </Button>
-          
           <div className="flex space-x-2">
             {questions.map((_, index) => (
               <button
@@ -218,18 +244,19 @@ export default function PracticeQuestions({ courseId }: PracticeQuestionsProps) 
                   index === currentQuestionIndex
                     ? 'bg-blue-600 text-white'
                     : selectedAnswers[questions[index].id]
-                    ? 'bg-green-100 text-green-700 border border-green-300'
-                    : 'bg-gray-100 text-gray-700 border border-gray-300'
+                      ? 'bg-green-100 text-green-700 border border-green-300'
+                      : 'bg-gray-100 text-gray-700 border border-gray-300'
                 }`}
               >
                 {index + 1}
               </button>
             ))}
           </div>
-
           <Button
             onClick={nextQuestion}
-            disabled={!selectedAnswers[currentQuestion.id]}
+            disabled={multi
+              ? !Array.isArray(selectedAnswers[currentQuestion.id]) || (selectedAnswers[currentQuestion.id] as string[]).length === 0
+              : !selectedAnswers[currentQuestion.id]}
             className="min-w-[100px]"
           >
             {currentQuestionIndex < questions.length - 1 ? 'Next' : 'Finish Practice'}

@@ -424,11 +424,10 @@ export interface QuizAnswer {
   id: string;
   attemptId: string;
   questionId: string;
-  selectedAnswerId: string | null;
+  selectedAnswerIds: string[]; // Array of selected answer IDs (supports multi-answer)
   isCorrect: boolean;
   createdAt: string;
   question?: Question;
-  selectedAnswer?: Answer;
 }
 
 export interface QuizAttempt {
@@ -459,7 +458,7 @@ export interface SubmitQuizAttemptRequest {
   packageId: string;
   answers: {
     questionId: string;
-    selectedAnswerId: string | null;
+    selectedAnswerId: string | string[] | null;
   }[];
   timeSpent: number;
   startedAt: string;

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import api from '@/lib/api'
+import { formatIDR } from '@/lib/currency'
 
 type Package = {
   id: string
@@ -58,7 +59,7 @@ export default function PackageList() {
             </CardHeader>
             <CardContent className="px-4 py-3">
               <div className="flex items-center justify-between">
-                <div className="text-lg font-semibold">${pkg.price?.toFixed?.(2) ?? pkg.price}</div>
+                <div className="text-lg font-semibold">{formatIDR(pkg.price)}</div>
                 <div>
                   {enrolled ? (
                     <Link href={`/quiz/${pkg.id}`} className="inline-flex items-center px-3 py-1 rounded bg-blue-600 text-white">Start</Link>

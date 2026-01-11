@@ -10,7 +10,7 @@ import type { Package, Question, SubmitQuizAttemptResponse, GetMyAttemptsRespons
 
 interface QuizAnswer {
   questionId: string;
-  selectedAnswerId: string | null;
+  selectedAnswerId: string | string[] | null;
 }
 
 interface QuizState {
@@ -27,7 +27,9 @@ export default function QuizPage() {
 
   const [pkg, setPackage] = useState<Package | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
+  // For OSCE: answers: string[]; else: string
   const [quizState, setQuizState] = useState<QuizState | null>(null);
+  const [isOSCE, setIsOSCE] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +95,10 @@ export default function QuizPage() {
       const packageData = response.data;
       setPackage(packageData);
 
+      // Detect OSCE quiz
+      const osce = !!(packageData.title && packageData.title.trim().toUpperCase().startsWith('OSCE'));
+      setIsOSCE(osce);
+
       // Extract questions from package
       const packageQuestions = packageData.packageQuestions || [];
       const sortedQuestions = packageQuestions
@@ -121,12 +127,25 @@ export default function QuizPage() {
 
   const handleSelectAnswer = (questionId: string, answerId: string) => {
     if (!quizState) return;
-
-    setQuizState({
-      ...quizState,
-      answers: quizState.answers.map((a) =>
-        a.questionId === questionId ? { ...a, selectedAnswerId: answerId } : a
-      ),
+    setQuizState((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        answers: prev.answers.map((a) => {
+          if (a.questionId !== questionId) return a;
+          if (!isOSCE) {
+            return { ...a, selectedAnswerId: answerId };
+          } else {
+            // Multi-answer: toggle answerId in array
+            const arr = Array.isArray(a.selectedAnswerId) ? a.selectedAnswerId : [];
+            if (arr.includes(answerId)) {
+              return { ...a, selectedAnswerId: arr.filter((id) => id !== answerId) };
+            } else {
+              return { ...a, selectedAnswerId: [...arr, answerId] };
+            }
+          }
+        }),
+      };
     });
   };
 
@@ -185,7 +204,10 @@ export default function QuizPage() {
 
   const getAnsweredCount = () => {
     if (!quizState) return 0;
-    return quizState.answers.filter((a) => a.selectedAnswerId !== null).length;
+    return quizState.answers.filter((a) => {
+      if (!isOSCE) return a.selectedAnswerId !== null;
+      return Array.isArray(a.selectedAnswerId) && a.selectedAnswerId.length > 0;
+    }).length;
   };
 
   if (loading || checkingAttempt) {
@@ -283,31 +305,39 @@ export default function QuizPage() {
 
             {/* Answer Options */}
             <div className="space-y-3">
-              {currentQuestion.answers.map((answer, index) => (
-                <label
-                  key={answer.id}
-                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    currentAnswer.selectedAnswerId === answer.id
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name={`question-${currentQuestion.id}`}
-                    value={answer.id}
-                    checked={currentAnswer.selectedAnswerId === answer.id}
-                    onChange={() => handleSelectAnswer(currentQuestion.id, answer.id)}
-                    className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300"
-                  />
-                  <div className="ml-4 flex items-center flex-1">
-                    <span className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium mr-3 flex-shrink-0">
-                      {String.fromCharCode(65 + index)}
-                    </span>
-                    <RichText className="text-gray-900" html={answer.text} />
-                  </div>
-                </label>
-              ))}
+              {currentQuestion.answers.map((answer, index) => {
+                let checked = false;
+                if (!isOSCE) {
+                  checked = currentAnswer.selectedAnswerId === answer.id;
+                } else {
+                  checked = Array.isArray(currentAnswer.selectedAnswerId) && currentAnswer.selectedAnswerId.includes(answer.id);
+                }
+                return (
+                  <label
+                    key={answer.id}
+                    className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      checked
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <input
+                      type={isOSCE ? "checkbox" : "radio"}
+                      name={`question-${currentQuestion.id}`}
+                      value={answer.id}
+                      checked={checked}
+                      onChange={() => handleSelectAnswer(currentQuestion.id, answer.id)}
+                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <div className="ml-4 flex items-center flex-1">
+                      <span className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium mr-3 flex-shrink-0">
+                        {String.fromCharCode(65 + index)}
+                      </span>
+                      <RichText className="text-gray-900" html={answer.text} />
+                    </div>
+                  </label>
+                );
+              })}
             </div>
 
             {/* Navigation Buttons */}

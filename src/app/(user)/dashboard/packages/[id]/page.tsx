@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import api from '@/lib/api'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import Button from '@/components/Button'
+import { formatIDR } from '@/lib/currency'
 
 export default function PackageDetailPage() {
   const params = useParams()
@@ -68,7 +69,7 @@ export default function PackageDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="mb-4">
-              <div className="text-lg font-semibold">${pkg.price?.toFixed?.(2) ?? pkg.price}</div>
+              <div className="text-lg font-semibold">{formatIDR(pkg.price)}</div>
               <div className="text-sm text-muted-foreground">Questions: {pkg.packageQuestions?.length ?? 0}</div>
             </div>
             <div>
@@ -92,7 +93,7 @@ export default function PackageDetailPage() {
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            <div className="text-lg font-semibold">${bundle.price?.toFixed?.(2) ?? bundle.price}</div>
+            <div className="text-lg font-semibold">{formatIDR(bundle.price)}</div>
             <div className="text-sm text-muted-foreground">Packages: {bundle.bundlePackages?.length ?? 0} • Questions: {bundle.stats?.totalQuestions ?? 0}</div>
           </div>
 
