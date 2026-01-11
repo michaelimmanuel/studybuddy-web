@@ -85,6 +85,14 @@ const Navbar = () => {
             >
               Paket
             </a>
+            {isLoggedIn && (
+              <Link 
+                href="/dashboard/shop"
+                className="text-white/80 hover:text-white transition-colors duration-200"
+              >
+                Shop
+              </Link>
+            )}
             <a 
               href="#review" 
               onClick={(e) => handleSmoothScroll(e, 'review')}
