@@ -7,6 +7,7 @@ import Button from "@/components/Button";
 import RichText from "@/components/RichText";
 import api from "@/lib/api";
 import type { Package, Question, SubmitQuizAttemptResponse, GetMyAttemptsResponse } from "@/types";
+import { saveQuizState, restoreQuizState, clearQuizState, resumeQuizState, type PersistedQuizState } from "@/lib/quizStorage";
 
 interface QuizAnswer {
   questionId: string;
@@ -35,6 +36,7 @@ export default function QuizPage() {
   const [error, setError] = useState<string | null>(null);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
   const [checkingAttempt, setCheckingAttempt] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     checkExistingAttempt();
@@ -53,8 +55,15 @@ export default function QuizPage() {
         return;
       }
       
-      // No existing attempt, load quiz
-      fetchPackageAndQuestions();
+      // No existing attempt, try to restore from localStorage
+      const savedState = restoreQuizState(packageId);
+      if (savedState) {
+        // Restore saved quiz state
+        fetchPackageAndQuestions(savedState);
+      } else {
+        // Start fresh quiz
+        fetchPackageAndQuestions();
+      }
     } catch (err: any) {
       console.error("Failed to check existing attempts:", err);
       // If check fails, allow them to proceed
@@ -66,7 +75,7 @@ export default function QuizPage() {
 
   // Timer effect
   useEffect(() => {
-    if (!quizState || quizState.timeRemaining === null) return;
+    if (!quizState || quizState.timeRemaining === null || isPaused) return;
 
     const timer = setInterval(() => {
       setQuizState((prev) => {
@@ -85,9 +94,9 @@ export default function QuizPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [quizState?.timeRemaining]);
+  }, [quizState?.timeRemaining, isPaused]);
 
-  const fetchPackageAndQuestions = async () => {
+  const fetchPackageAndQuestions = async (savedState?: PersistedQuizState) => {
     try {
       setLoading(true);
       const response = await api.get<{ success: boolean; data: Package }>(`/api/packages/${packageId}`);
@@ -107,17 +116,29 @@ export default function QuizPage() {
 
       setQuestions(sortedQuestions);
 
-      // Initialize quiz state
-      const timeLimit = packageData.timeLimit;
-      setQuizState({
-        currentIndex: 0,
-        answers: sortedQuestions.map((q) => ({
-          questionId: q.id,
-          selectedAnswerId: null,
-        })),
-        startTime: Date.now(),
-        timeRemaining: timeLimit ? timeLimit * 60 : null, // convert minutes to seconds
-      });
+      // Restore saved state or initialize new quiz state
+      if (savedState) {
+        const resumed = resumeQuizState(savedState);
+        setQuizState({
+          currentIndex: resumed.currentIndex,
+          answers: resumed.answers,
+          startTime: resumed.startTime,
+          timeRemaining: resumed.timeRemaining,
+        });
+        setIsPaused(resumed.isPaused);
+      } else {
+        // Initialize new quiz state
+        const timeLimit = packageData.timeLimit;
+        setQuizState({
+          currentIndex: 0,
+          answers: sortedQuestions.map((q) => ({
+            questionId: q.id,
+            selectedAnswerId: null,
+          })),
+          startTime: Date.now(),
+          timeRemaining: timeLimit ? timeLimit * 60 : null, // convert minutes to seconds
+        });
+      }
     } catch (err: any) {
       setError(err.message || "Failed to load quiz");
     } finally {
@@ -126,10 +147,10 @@ export default function QuizPage() {
   };
 
   const handleSelectAnswer = (questionId: string, answerId: string) => {
-    if (!quizState) return;
+    if (!quizState || isPaused) return;
     setQuizState((prev) => {
       if (!prev) return prev;
-      return {
+      const newState = {
         ...prev,
         answers: prev.answers.map((a) => {
           if (a.questionId !== questionId) return a;
@@ -146,22 +167,86 @@ export default function QuizPage() {
           }
         }),
       };
+      // Save to localStorage
+      saveQuizState({
+        packageId,
+        currentIndex: newState.currentIndex,
+        answers: newState.answers,
+        startTime: newState.startTime,
+        timeRemaining: newState.timeRemaining,
+        isPaused: false,
+      });
+      return newState;
     });
   };
 
   const handleNext = () => {
-    if (!quizState || quizState.currentIndex >= questions.length - 1) return;
-    setQuizState({ ...quizState, currentIndex: quizState.currentIndex + 1 });
+    if (!quizState || quizState.currentIndex >= questions.length - 1 || isPaused) return;
+    const newState = { ...quizState, currentIndex: quizState.currentIndex + 1 };
+    setQuizState(newState);
+    saveQuizState({
+      packageId,
+      currentIndex: newState.currentIndex,
+      answers: newState.answers,
+      startTime: newState.startTime,
+      timeRemaining: newState.timeRemaining,
+      isPaused: false,
+    });
   };
 
   const handlePrevious = () => {
-    if (!quizState || quizState.currentIndex <= 0) return;
-    setQuizState({ ...quizState, currentIndex: quizState.currentIndex - 1 });
+    if (!quizState || quizState.currentIndex <= 0 || isPaused) return;
+    const newState = { ...quizState, currentIndex: quizState.currentIndex - 1 };
+    setQuizState(newState);
+    saveQuizState({
+      packageId,
+      currentIndex: newState.currentIndex,
+      answers: newState.answers,
+      startTime: newState.startTime,
+      timeRemaining: newState.timeRemaining,
+      isPaused: false,
+    });
   };
 
   const handleGoToQuestion = (index: number) => {
+    if (!quizState || isPaused) return;
+    const newState = { ...quizState, currentIndex: index };
+    setQuizState(newState);
+    saveQuizState({
+      packageId,
+      currentIndex: newState.currentIndex,
+      answers: newState.answers,
+      startTime: newState.startTime,
+      timeRemaining: newState.timeRemaining,
+      isPaused: false,
+    });
+  };
+
+  const handlePauseQuiz = () => {
     if (!quizState) return;
-    setQuizState({ ...quizState, currentIndex: index });
+    setIsPaused(true);
+    saveQuizState({
+      packageId,
+      currentIndex: quizState.currentIndex,
+      answers: quizState.answers,
+      startTime: quizState.startTime,
+      timeRemaining: quizState.timeRemaining,
+      isPaused: true,
+      pausedAt: Date.now(),
+    });
+  };
+
+  const handleResumeQuiz = () => {
+    setIsPaused(false);
+    if (!quizState) return;
+    saveQuizState({
+      packageId,
+      currentIndex: quizState.currentIndex,
+      answers: quizState.answers,
+      startTime: quizState.startTime,
+      timeRemaining: quizState.timeRemaining,
+      isPaused: false,
+    });
   };
 
   const handleSubmitQuiz = async (autoSubmit = false) => {
@@ -186,6 +271,9 @@ export default function QuizPage() {
       });
 
       const attemptData = response.data;
+
+      // Clear saved state after successful submission
+      clearQuizState();
 
       // Navigate to results page with attempt ID
       router.push(`/quiz/${packageId}/results/${attemptData.id}`);
@@ -243,6 +331,37 @@ export default function QuizPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* Pause Overlay */}
+      {isPaused && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
+          <Card className="p-8 max-w-md w-full text-center">
+            <div className="mb-6">
+              <div className="w-20 h-20 mx-auto mb-4 bg-yellow-100 rounded-full flex items-center justify-center">
+                <svg className="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Quiz Paused</h2>
+              <p className="text-gray-600">
+                Your progress has been saved. You can refresh the page or close your browser, and your answers will be preserved.
+              </p>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-blue-800">
+                <strong>Progress saved:</strong>
+                <br />
+                {answeredCount} of {questions.length} questions answered
+                <br />
+                Currently on Question {quizState.currentIndex + 1}
+              </p>
+            </div>
+            <Button onClick={handleResumeQuiz} className="w-full">
+              Resume Quiz
+            </Button>
+          </Card>
+        </div>
+      )}
+      
       {/* Header */}
       <Card className="p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
@@ -253,14 +372,40 @@ export default function QuizPage() {
             </p>
           </div>
 
-          {quizState.timeRemaining !== null && (
-            <div className={`text-right ${quizState.timeRemaining < 60 ? 'text-red-600' : 'text-gray-900'}`}>
-              <div className="text-sm font-medium">Time Remaining</div>
-              <div className={`text-2xl font-bold ${quizState.timeRemaining < 60 ? 'animate-pulse' : ''}`}>
-                {formatTime(quizState.timeRemaining)}
+          <div className="flex items-center gap-4">
+            {/* Pause/Resume Button */}
+            <Button
+              variant="outline"
+              onClick={isPaused ? handleResumeQuiz : handlePauseQuiz}
+              className="flex items-center gap-2"
+            >
+              {isPaused ? (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  Resume
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                  </svg>
+                  Pause
+                </>
+              )}
+            </Button>
+
+            {/* Timer */}
+            {quizState.timeRemaining !== null && (
+              <div className={`text-right ${quizState.timeRemaining < 60 ? 'text-red-600' : 'text-gray-900'}`}>
+                <div className="text-sm font-medium">Time Remaining</div>
+                <div className={`text-2xl font-bold ${quizState.timeRemaining < 60 ? 'animate-pulse' : ''}`}>
+                  {formatTime(quizState.timeRemaining)}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Progress bar */}
@@ -315,10 +460,12 @@ export default function QuizPage() {
                 return (
                   <label
                     key={answer.id}
-                    className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      checked
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                    className={`flex items-center p-4 border-2 rounded-lg transition-all ${
+                      isPaused
+                        ? "opacity-50 cursor-not-allowed border-gray-200 bg-gray-50"
+                        : checked
+                        ? "border-blue-500 bg-blue-50 cursor-pointer"
+                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50 cursor-pointer"
                     }`}
                   >
                     <input
@@ -327,7 +474,8 @@ export default function QuizPage() {
                       value={answer.id}
                       checked={checked}
                       onChange={() => handleSelectAnswer(currentQuestion.id, answer.id)}
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      disabled={isPaused}
+                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 disabled:opacity-50"
                     />
                     <div className="ml-4 flex items-center flex-1">
                       <span className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium mr-3 flex-shrink-0">
@@ -345,18 +493,18 @@ export default function QuizPage() {
               <Button
                 variant="outline"
                 onClick={handlePrevious}
-                disabled={quizState.currentIndex === 0}
+                disabled={quizState.currentIndex === 0 || isPaused}
               >
                 ← Previous
               </Button>
 
               {quizState.currentIndex < questions.length - 1 ? (
-                <Button onClick={handleNext}>Next →</Button>
+                <Button onClick={handleNext} disabled={isPaused}>Next →</Button>
               ) : (
                 <Button
                   onClick={() => handleSubmitQuiz(false)}
                   className="bg-green-600 hover:bg-green-700"
-                  disabled={submitting}
+                  disabled={submitting || isPaused}
                 >
                   {submitting ? "Submitting..." : "Submit Quiz"}
                 </Button>
@@ -380,8 +528,11 @@ export default function QuizPage() {
                   <button
                     key={index}
                     onClick={() => handleGoToQuestion(index)}
+                    disabled={isPaused}
                     className={`aspect-square rounded-lg text-sm font-medium transition-all ${
-                      isCurrent
+                      isPaused
+                        ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-700"
+                        : isCurrent
                         ? "bg-blue-600 text-white ring-2 ring-blue-600 ring-offset-2"
                         : answered
                         ? "bg-green-100 text-green-700 border-2 border-green-300 hover:bg-green-200"
