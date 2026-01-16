@@ -3,19 +3,10 @@ import React from 'react'
 const About = () => {
   return (
     <section id="about" className="flex flex-col md:flex-row items-center justify-between py-12 px-48 bg-gradient-to-b from-[#005FAA] to-[#002644] text-white">
-      {/* Left: Image */}
-      <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
-        <img
-          src="/img/about-img.png"
-          alt="About StudyBuddy"
-          className="rounded-lg object-cover"
-          width={600}
-          height={600}
-        />
-      </div>
+     
       {/* Right: Text */}
       <div className="w-full md:w-1/2 flex flex-col justify-center px-4">
-        <h2 className="text-2xl font-bold mb-6  w-fit px-6 py-2 text-green">About Us</h2>
+        <h2 className="text-2xl font-bold mb-6  w-fit px-6 py-2 text-green bg-[rgba(12,149,253,0.5)] rounded-xl">About Us</h2>
         <p className="text-lg text-white text-justify">
           Kami tahu, perjalanan menuju gelar dokter gigi bukanlah hal yang mudah
           penuh tantangan, kebingungan, dan rasa lelah.

@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import api from '@/lib/api'
 import { formatIDR } from '@/lib/currency'
 import Button from '@/components/Button'
+import ImageUpload from '@/components/ImageUpload'
 import type { Bundle } from '@/types'
 
 export default function ShopPage() {
@@ -15,6 +16,7 @@ export default function ShopPage() {
   const [selectedBundle, setSelectedBundle] = useState<Bundle | null>(null)
   const [showPurchaseModal, setShowPurchaseModal] = useState(false)
   const [referralCode, setReferralCode] = useState('')
+  const [proofImageUrl, setProofImageUrl] = useState('')
   const [purchasing, setPurchasing] = useState(false)
   const [purchaseError, setPurchaseError] = useState<string | null>(null)
 
@@ -47,12 +49,18 @@ export default function ShopPage() {
   const handlePurchase = async () => {
     if (!selectedBundle) return
     
+    if (!proofImageUrl) {
+      setPurchaseError('Please upload payment proof image')
+      return
+    }
+    
     setPurchasing(true)
     setPurchaseError(null)
     
     try {
       await api.post('/api/purchases/bundle', {
         bundleId: selectedBundle.id,
+        proofImageUrl,
         referralCode: referralCode || undefined
       })
       
@@ -61,6 +69,7 @@ export default function ShopPage() {
       setShowPurchaseModal(false)
       setSelectedBundle(null)
       setReferralCode('')
+      setProofImageUrl('')
       
       // Show success message
       alert('Purchase request submitted! Please wait for admin approval.')
@@ -246,6 +255,19 @@ export default function ShopPage() {
                 />
               </div>
 
+              {/* Payment Proof Upload */}
+              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                <ImageUpload
+                  onUploadComplete={setProofImageUrl}
+                  onUploadError={(err) => setPurchaseError(err)}
+                  currentImageUrl={proofImageUrl}
+                  folder="payment-proofs"
+                  label="Payment Proof"
+                  buttonText="Upload Payment Proof"
+                  maxSizeMB={5}
+                />
+              </div>
+
               {purchaseError && (
                 <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
                   <p className="text-sm text-red-200">{purchaseError}</p>
@@ -266,6 +288,7 @@ export default function ShopPage() {
                     setSelectedBundle(null)
                     setPurchaseError(null)
                     setReferralCode('')
+                    setProofImageUrl('')
                   }}
                   disabled={purchasing}
                   className="flex-1 bg-white/10 border-2 border-white/40 text-white hover:bg-white/20 hover:border-white/60"

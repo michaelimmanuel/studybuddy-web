@@ -20,8 +20,8 @@ export default function Home() {
       <div className="h-48 bg-gradient-to-b from-[#005FAA] to-[#005FAA]/[0.79]"></div>
       <Review/>
       <div className="h-48"></div>
-      <FAQSection />
-      <div className="h-48"></div>
+      {/* <FAQSection />
+      <div className="h-48"></div> */}
       <Contact />
     </>
   );
