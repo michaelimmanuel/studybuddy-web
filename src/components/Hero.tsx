@@ -1,13 +1,38 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import api from '@/lib/api';
 
 export function Hero() {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"]
   });
+
+  const handleGetStarted = async () => {
+    try {
+      // Check if user is logged in
+      await api.get('/api/users/me');
+      // User is logged in, scroll to pricing
+      const pricingSection = document.getElementById('pricing');
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch {
+      // User not logged in, redirect to auth page
+      router.push('/auth');
+    }
+  };
+
+  const scrollToPricing = () => {
+    const pricingSection = document.getElementById('pricing');
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
@@ -33,9 +58,10 @@ export function Hero() {
             className="text-2xl font-bold tracking-tight"
             whileHover={{ scale: 1.05 }}
           >
-            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            <img src="/img/logo.png" alt="" className='w-[60%]'/>
+            {/* <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
               StudyBuddy
-            </span>
+            </span> */}
           </motion.div>
           
           <div className="hidden md:flex items-center gap-12">
@@ -46,6 +72,7 @@ export function Hero() {
               className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={handleGetStarted}
             >
               Get Started
             </motion.button>
@@ -101,8 +128,9 @@ export function Hero() {
             className="group relative px-8 py-4 bg-white text-black rounded-full font-medium flex items-center gap-2 overflow-hidden"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={handleGetStarted}
           >
-            <span className="relative z-10">Start Free Trial</span>
+            <span className="relative z-10">Get Started</span>
             <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400"
@@ -112,13 +140,13 @@ export function Hero() {
             />
           </motion.button>
 
-          <motion.button
+          {/* <motion.button
             className="px-8 py-4 border border-white/20 rounded-full font-medium hover:bg-white/5 transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Watch Demo
-          </motion.button>
+          </motion.button> */}
         </motion.div>
 
         {/* Floating Stats */}

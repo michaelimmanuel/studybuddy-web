@@ -39,7 +39,7 @@ export function Pricing() {
     api.get('/api/users/me')
       .then(() => {
         // User is logged in, redirect to bundle detail page
-        router.push(`/bundles/${bundleId}`);
+        router.push(`/dashboard/shop`);
       })
       .catch(() => {
         // User not logged in, redirect to login
