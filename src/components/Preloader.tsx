@@ -14,9 +14,7 @@ export function Preloader() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            StudyBuddy
-          </span>
+          <img src="/img/logo.png" alt="StudyBuddy Logo" className="" />
         </motion.div>
         
         <motion.div
