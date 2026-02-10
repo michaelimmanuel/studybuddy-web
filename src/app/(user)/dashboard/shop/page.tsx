@@ -202,11 +202,11 @@ export default function ShopPage() {
 
       {/* Purchase Modal */}
       {showPurchaseModal && selectedBundle && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md bg-white/10 backdrop-blur-md border-white/20">
-            <div className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">Purchase Bundle</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+          <Card className="w-full max-w-md bg-white/10 backdrop-blur-md border-white/20 max-h-[95vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+              <div className="flex items-center justify-between sticky top-0 bg-inherit pb-2 sm:pb-0 sm:static">
+                <h3 className="text-lg sm:text-xl font-bold text-white">Purchase Bundle</h3>
                 <button
                   onClick={() => {
                     setShowPurchaseModal(false)
@@ -214,36 +214,36 @@ export default function ShopPage() {
                     setPurchaseError(null)
                     setReferralCode('')
                   }}
-                  className="text-white/60 hover:text-white"
+                  className="text-white/60 hover:text-white flex-shrink-0"
                 >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
 
-              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                <h4 className="font-semibold text-white mb-1">{selectedBundle.title}</h4>
-                <p className="text-sm text-white/60 mb-3">{selectedBundle.description}</p>
-                <div className="text-2xl font-bold text-blue-300">{formatIDR(selectedBundle.price)}</div>
+              <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
+                <h4 className="font-semibold text-white mb-1 text-sm sm:text-base">{selectedBundle.title}</h4>
+                <p className="text-xs sm:text-sm text-white/60 mb-2 sm:mb-3 line-clamp-2">{selectedBundle.description}</p>
+                <div className="text-xl sm:text-2xl font-bold text-blue-300">{formatIDR(selectedBundle.price)}</div>
               </div>
 
               {/* QR Code Payment */}
-              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                <label className="block text-sm font-medium text-white/80 mb-3">
+              <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
+                <label className="block text-xs sm:text-sm font-medium text-white/80 mb-2 sm:mb-3">
                   Scan QR Code to Pay
                 </label>
                 <div className="flex justify-center">
                   <img 
                     src="/img/QR.jpg" 
                     alt="Payment QR Code" 
-                    className="w-64 h-64 object-contain rounded-lg bg-white"
+                    className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain rounded-lg bg-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-white/80 mb-2">
                   Referral Code (Optional)
                 </label>
                 <input
@@ -251,12 +251,12 @@ export default function ShopPage() {
                   value={referralCode}
                   onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                   placeholder="Enter code"
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 />
               </div>
 
               {/* Payment Proof Upload */}
-              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10">
                 <ImageUpload
                   onUploadComplete={setProofImageUrl}
                   onUploadError={(err) => setPurchaseError(err)}
@@ -269,18 +269,18 @@ export default function ShopPage() {
               </div>
 
               {purchaseError && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                  <p className="text-sm text-red-200">{purchaseError}</p>
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2 sm:p-3">
+                  <p className="text-xs sm:text-sm text-red-200">{purchaseError}</p>
                 </div>
               )}
 
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-                <p className="text-sm text-blue-200">
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-2 sm:p-3">
+                <p className="text-xs sm:text-sm text-blue-200">
                   <strong>Note:</strong> After submitting, please wait for admin approval. You'll receive access once confirmed.
                 </p>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -291,14 +291,14 @@ export default function ShopPage() {
                     setProofImageUrl('')
                   }}
                   disabled={purchasing}
-                  className="flex-1 bg-white/10 border-2 border-white/40 text-white hover:bg-white/20 hover:border-white/60"
+                  className="w-full sm:flex-1 bg-white/10 border-2 border-white/40 text-white hover:bg-white/20 hover:border-white/60"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handlePurchase}
                   disabled={purchasing}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-green-500"
+                  className="w-full sm:flex-1 bg-gradient-to-r from-green-600 to-green-500"
                 >
                   {purchasing ? 'Processing...' : 'Confirm Purchase'}
                 </Button>

@@ -73,25 +73,25 @@ export default function PurchasePackageModal({ open, onClose, packageId, package
     <Modal isOpen={open} onClose={handleClose} title={packageTitle ? `Purchase: ${packageTitle}` : "Purchase Package"}>
       <div className="space-y-4">
         {!success && packagePrice > 0 && (
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
             <div className="space-y-1">
               {hasSavings ? (
                 <>
-                  <div className="flex justify-between text-gray-600">
+                  <div className="flex justify-between text-sm sm:text-base text-gray-600">
                     <span>Original Price:</span>
                     <span className="line-through">Rp {packagePrice.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-green-600 font-semibold">
+                  <div className="flex justify-between text-sm sm:text-base text-green-600 font-semibold">
                     <span>Discount:</span>
                     <span>- Rp {(packagePrice - finalPrice).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-xl font-bold pt-2 border-t">
+                  <div className="flex justify-between text-lg sm:text-xl font-bold pt-2 border-t">
                     <span>Final Price:</span>
                     <span className="text-green-600">Rp {finalPrice.toLocaleString()}</span>
                   </div>
                 </>
               ) : (
-                <div className="flex justify-between text-xl font-bold">
+                <div className="flex justify-between text-lg sm:text-xl font-bold">
                   <span>Price:</span>
                   <span>Rp {packagePrice.toLocaleString()}</span>
                 </div>
@@ -109,21 +109,21 @@ export default function PurchasePackageModal({ open, onClose, packageId, package
         )}
 
         {!success && (
-          <div className="bg-blue-50 border border-blue-200 rounded p-4">
-            <h3 className="font-semibold text-blue-900 mb-3">Payment Instructions:</h3>
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-shrink-0">
+          <div className="bg-blue-50 border border-blue-200 rounded p-3 sm:p-4">
+            <h3 className="font-semibold text-blue-900 mb-2 sm:mb-3 text-sm sm:text-base">Payment Instructions:</h3>
+            <div className="flex flex-col md:flex-row gap-3 sm:gap-4">
+              <div className="flex-shrink-0 mx-auto md:mx-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src="/img/QR.jpg" 
                   alt="Payment QR Code" 
-                  className="w-48 h-48 object-contain border-2 border-gray-300 rounded-lg bg-white"
+                  className="w-40 h-40 sm:w-48 sm:h-48 object-contain border-2 border-gray-300 rounded-lg bg-white"
                 />
               </div>
-              <div className="flex-1 text-sm text-gray-700">
-                <ol className="list-decimal list-inside space-y-2">
+              <div className="flex-1 text-xs sm:text-sm text-gray-700">
+                <ol className="list-decimal list-inside space-y-1 sm:space-y-2">
                   <li>Scan the QR code or transfer to the account shown</li>
-                  <li>Transfer amount: <strong>Rp {finalPrice.toLocaleString()}</strong></li>
+                  <li>Transfer amount: <strong className="text-sm sm:text-base">Rp {finalPrice.toLocaleString()}</strong></li>
                   <li>Take a screenshot of your payment confirmation</li>
                   <li>Upload the proof below</li>
                   <li>Wait for admin approval (within 24 hours)</li>
@@ -145,25 +145,25 @@ export default function PurchasePackageModal({ open, onClose, packageId, package
           />
         )}
 
-        {error && <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded p-3">{error}</div>}
+        {error && <div className="text-red-600 text-xs sm:text-sm bg-red-50 border border-red-200 rounded p-2 sm:p-3">{error}</div>}
 
         {success && (
-          <div className="bg-green-50 border border-green-200 rounded p-3 text-sm text-green-800">
+          <div className="bg-green-50 border border-green-200 rounded p-2 sm:p-3 text-xs sm:text-sm text-green-800">
             <p className="font-semibold">Purchase request submitted successfully!</p>
             <p className="mt-1">Please wait for admin approval. You'll be able to access the content once your payment is confirmed.</p>
           </div>
         )}
 
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
           {!success ? (
             <>
-              <Button variant="outline" onClick={handleClose} disabled={loading}>Cancel</Button>
-              <Button className="bg-blue-600 text-white" onClick={handleSubmit} loading={loading}>
+              <Button variant="outline" onClick={handleClose} disabled={loading} className="w-full sm:w-auto">Cancel</Button>
+              <Button className="bg-blue-600 text-white w-full sm:w-auto" onClick={handleSubmit} loading={loading}>
                 Submit Request
               </Button>
             </>
           ) : (
-            <Button className="bg-green-600 text-white" onClick={handleClose}>Close</Button>
+            <Button className="bg-green-600 text-white w-full sm:w-auto" onClick={handleClose}>Close</Button>
           )}
         </div>
       </div>
