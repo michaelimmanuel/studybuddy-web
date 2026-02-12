@@ -19,6 +19,7 @@ interface QuizState {
   answers: QuizAnswer[];
   startTime: number;
   timeRemaining: number | null; // in seconds, null if no limit
+  markedQuestions: string[]; // Array of question IDs marked for review
 }
 
 export default function QuizPage() {
@@ -124,6 +125,7 @@ export default function QuizPage() {
           answers: resumed.answers,
           startTime: resumed.startTime,
           timeRemaining: resumed.timeRemaining,
+          markedQuestions: resumed.markedQuestions || [],
         });
         setIsPaused(resumed.isPaused);
       } else {
@@ -137,6 +139,7 @@ export default function QuizPage() {
           })),
           startTime: Date.now(),
           timeRemaining: timeLimit ? timeLimit * 60 : null, // convert minutes to seconds
+          markedQuestions: [],
         });
       }
     } catch (err: any) {
@@ -175,6 +178,7 @@ export default function QuizPage() {
         startTime: newState.startTime,
         timeRemaining: newState.timeRemaining,
         isPaused: false,
+        markedQuestions: newState.markedQuestions,
       });
       return newState;
     });
@@ -191,6 +195,7 @@ export default function QuizPage() {
       startTime: newState.startTime,
       timeRemaining: newState.timeRemaining,
       isPaused: false,
+      markedQuestions: newState.markedQuestions,
     });
   };
 
@@ -205,6 +210,7 @@ export default function QuizPage() {
       startTime: newState.startTime,
       timeRemaining: newState.timeRemaining,
       isPaused: false,
+      markedQuestions: newState.markedQuestions,
     });
   };
 
@@ -219,6 +225,7 @@ export default function QuizPage() {
       startTime: newState.startTime,
       timeRemaining: newState.timeRemaining,
       isPaused: false,
+      markedQuestions: newState.markedQuestions,
     });
   };
 
@@ -233,6 +240,7 @@ export default function QuizPage() {
       timeRemaining: quizState.timeRemaining,
       isPaused: true,
       pausedAt: Date.now(),
+      markedQuestions: quizState.markedQuestions,
     });
   };
 
@@ -246,6 +254,7 @@ export default function QuizPage() {
       startTime: quizState.startTime,
       timeRemaining: quizState.timeRemaining,
       isPaused: false,
+      markedQuestions: quizState.markedQuestions,
     });
   };
 
@@ -298,6 +307,35 @@ export default function QuizPage() {
     }).length;
   };
 
+  const handleToggleMarkQuestion = (questionId: string) => {
+    if (!quizState || isPaused) return;
+    setQuizState((prev) => {
+      if (!prev) return prev;
+      const isMarked = prev.markedQuestions.includes(questionId);
+      const newMarkedQuestions = isMarked
+        ? prev.markedQuestions.filter((id) => id !== questionId)
+        : [...prev.markedQuestions, questionId];
+      
+      const newState = {
+        ...prev,
+        markedQuestions: newMarkedQuestions,
+      };
+
+      // Save to localStorage
+      saveQuizState({
+        packageId,
+        currentIndex: newState.currentIndex,
+        answers: newState.answers,
+        startTime: newState.startTime,
+        timeRemaining: newState.timeRemaining,
+        isPaused: false,
+        markedQuestions: newMarkedQuestions,
+      });
+
+      return newState;
+    });
+  };
+
   if (loading || checkingAttempt) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -328,6 +366,7 @@ export default function QuizPage() {
   const currentAnswer = quizState.answers[quizState.currentIndex];
   const progress = ((quizState.currentIndex + 1) / questions.length) * 100;
   const answeredCount = getAnsweredCount();
+  const isCurrentMarked = quizState.markedQuestions.includes(currentQuestion.id);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -353,6 +392,12 @@ export default function QuizPage() {
                 {answeredCount} of {questions.length} questions answered
                 <br />
                 Currently on Question {quizState.currentIndex + 1}
+                {quizState.markedQuestions.length > 0 && (
+                  <>
+                    <br />
+                    {quizState.markedQuestions.length} question{quizState.markedQuestions.length > 1 ? 's' : ''} marked for review
+                  </>
+                )}
               </p>
             </div>
             <Button onClick={handleResumeQuiz} className="w-full">
@@ -446,6 +491,36 @@ export default function QuizPage() {
                   />
                 </div>
               )}
+
+              {/* Mark for Review Button */}
+              <div className="mb-4">
+                <button
+                  onClick={() => handleToggleMarkQuestion(currentQuestion.id)}
+                  disabled={isPaused}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    isPaused
+                      ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-600"
+                      : isCurrentMarked
+                      ? "bg-yellow-100 text-yellow-800 border-2 border-yellow-400 hover:bg-yellow-200"
+                      : "bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200"
+                  }`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill={isCurrentMarked ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+                    />
+                  </svg>
+                  {isCurrentMarked ? "Marked for Review" : "Mark for Review"}
+                </button>
+              </div>
             </div>
 
             {/* Answer Options */}
@@ -520,16 +595,17 @@ export default function QuizPage() {
             
             {/* Question Grid */}
             <div className="grid grid-cols-5 lg:grid-cols-4 gap-2 mb-6">
-              {questions.map((_, index) => {
+              {questions.map((question, index) => {
                 const answered = quizState.answers[index].selectedAnswerId !== null;
                 const isCurrent = index === quizState.currentIndex;
+                const isMarked = quizState.markedQuestions.includes(question.id);
 
                 return (
                   <button
                     key={index}
                     onClick={() => handleGoToQuestion(index)}
                     disabled={isPaused}
-                    className={`aspect-square rounded-lg text-sm font-medium transition-all ${
+                    className={`relative aspect-square rounded-lg text-sm font-medium transition-all ${
                       isPaused
                         ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-700"
                         : isCurrent
@@ -540,6 +616,10 @@ export default function QuizPage() {
                     }`}
                   >
                     {index + 1}
+                    {/* Mark indicator - yellow flag */}
+                    {isMarked && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-white"></span>
+                    )}
                   </button>
                 );
               })}
@@ -558,6 +638,12 @@ export default function QuizPage() {
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded bg-gray-100 border-2 border-gray-300"></div>
                 <span className="text-gray-600">Unanswered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative w-6 h-6 rounded bg-gray-100 border-2 border-gray-300">
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-white"></span>
+                </div>
+                <span className="text-gray-600">Marked</span>
               </div>
             </div>
           </Card>

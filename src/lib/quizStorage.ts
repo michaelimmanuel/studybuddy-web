@@ -16,6 +16,7 @@ export interface PersistedQuizState {
   timeRemaining: number | null;
   isPaused: boolean;
   pausedAt?: number;
+  markedQuestions?: string[]; // Array of question IDs marked for review
 }
 
 const QUIZ_STORAGE_KEY = "studybuddy_quiz_state";
