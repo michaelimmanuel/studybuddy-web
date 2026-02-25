@@ -1,16 +1,55 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/lib/api';
+import api, { clearToken } from '@/lib/api';
 
 export function Hero() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"]
   });
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  async function checkAuthStatus() {
+    try {
+      await api.get('/api/users/me');
+      setIsLoggedIn(true);
+
+      try {
+        const adminResponse = await api.get<any>('/api/users/is-admin');
+        setIsAdmin(adminResponse.isAdmin === true);
+      } catch {
+        setIsAdmin(false);
+      }
+    } catch {
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      await api.post('/api/auth/sign-out', {});
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+    clearToken();
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    router.push('/');
+  }
 
   const handleGetStarted = async () => {
     try {
@@ -64,18 +103,42 @@ export function Hero() {
             </span> */}
           </motion.div>
           
-          <div className="hidden md:flex items-center gap-12">
+          <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-gray-400 hover:text-white transition-colors">Features</a>
             <a href="#quiz" className="text-sm text-gray-400 hover:text-white transition-colors">Quiz</a>
             <a href="#testimonials" className="text-sm text-gray-400 hover:text-white transition-colors">Stories</a>
-            <motion.button
-              className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleGetStarted}
-            >
-              Get Started
-            </motion.button>
+            
+            {isLoading ? (
+              <div className="w-32 h-9 bg-white/10 rounded-full animate-pulse"></div>
+            ) : isLoggedIn ? (
+              <>
+                <motion.button
+                  className="px-6 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-full text-sm font-medium hover:bg-white/20 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push(isAdmin ? '/admin/dashboard' : '/dashboard')}
+                >
+                  Dashboard
+                </motion.button>
+                <motion.button
+                  className="px-6 py-2 bg-red-600 text-white rounded-full text-sm font-medium hover:bg-red-700 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLogout}
+                >
+                  Logout
+                </motion.button>
+              </>
+            ) : (
+              <motion.button
+                className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/auth')}
+              >
+                Get Started
+              </motion.button>
+            )}
           </div>
         </div>
       </motion.nav>
@@ -91,9 +154,7 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mb-6"
         >
-          <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm text-gray-300">
-            ✨ Trusted by 10,000+ dental students worldwide
-          </span>
+         
         </motion.div>
 
         <motion.h1
