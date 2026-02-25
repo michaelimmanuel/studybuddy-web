@@ -10,6 +10,7 @@
   
   import { useEffect, useState } from 'react';
   import { Hero } from '@/components/Hero';
+  import { Countdown } from '@/components/Countdown';
   import { Features } from '@/components/Features';
   import { QuizShowcase } from '@/components/QuizShowcase';
   import { Statistics } from '@/components/Statistics';
@@ -37,6 +38,7 @@ export default function Home() {
       <div className="min-h-screen bg-black text-white overflow-x-hidden">
         <Cursor />
         <Hero />
+        <Countdown />
         <Features />
         <QuizShowcase />
         <Statistics />
