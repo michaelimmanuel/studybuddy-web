@@ -4,14 +4,36 @@ import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Calendar, Clock } from 'lucide-react';
 
+// Define all exam dates
+const examDates = [
+  { date: new Date('2026-05-09T00:00:00'), label: 'May 9, 2026' },
+  { date: new Date('2026-08-08T00:00:00'), label: 'August 8, 2026' },
+  { date: new Date('2026-11-07T00:00:00'), label: 'November 7, 2026' },
+];
+
 export function Countdown() {
   const [timeLeft, setTimeLeft] = useState({ months: 0, days: 0 });
-  const targetDate = new Date('2026-05-09T00:00:00');
+  const [currentExam, setCurrentExam] = useState(examDates[0]);
 
   useEffect(() => {
-    function calculateTimeLeft() {
+    function getNextExamDate() {
       const now = new Date();
-      const difference = targetDate.getTime() - now.getTime();
+      // Find the next upcoming exam date
+      for (const exam of examDates) {
+        if (exam.date.getTime() > now.getTime()) {
+          return exam;
+        }
+      }
+      // If all dates have passed, return the last one
+      return examDates[examDates.length - 1];
+    }
+
+    function calculateTimeLeft() {
+      const nextExam = getNextExamDate();
+      setCurrentExam(nextExam);
+
+      const now = new Date();
+      const difference = nextExam.date.getTime() - now.getTime();
 
       if (difference > 0) {
         // Calculate total days
@@ -128,7 +150,7 @@ export function Countdown() {
           >
             <div className="inline-flex items-center gap-2 text-sm text-gray-400">
               <Calendar className="w-4 h-4" />
-              <span>UKOMNAS-PPDG starts on: May 9, 2026</span>
+              <span>UKOMNAS-PPDG starts on: {currentExam.label}</span>
             </div>
           </motion.div>
         </motion.div>
