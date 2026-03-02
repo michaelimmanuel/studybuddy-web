@@ -249,6 +249,7 @@ export interface Package {
   title: string;
   description?: string;
   price: number;
+  type: 'QUIZ' | 'CBT' | 'OSCE'; // Package type: Quiz, CBT, or OSCE
   isActive: boolean;
   timeLimit?: number; // Time limit in minutes
   availableFrom?: string; // ISO string
@@ -272,6 +273,7 @@ export interface PackageForm {
   title: string;
   description?: string;
   price: number;
+  type?: 'QUIZ' | 'CBT' | 'OSCE'; // Package type: Quiz, CBT, or OSCE
   timeLimit?: number; // Time limit in minutes
   availableFrom?: string; // ISO string or empty string
   availableUntil?: string; // ISO string or empty string

@@ -20,6 +20,7 @@ export default function EditPackageModal({ isOpen, onClose, onSuccess, package: 
     title: "",
     description: "",
     price: 0,
+    type: "QUIZ",
     isActive: true,
     timeLimit: undefined,
     availableFrom: "",
@@ -32,6 +33,7 @@ export default function EditPackageModal({ isOpen, onClose, onSuccess, package: 
         title: pkg.title,
         description: pkg.description || "",
         price: pkg.price,
+        type: pkg.type,
         isActive: pkg.isActive,
         timeLimit: pkg.timeLimit,
         availableFrom: pkg.availableFrom ? pkg.availableFrom.slice(0, 16) : "", // Convert to datetime-local format
@@ -157,6 +159,27 @@ export default function EditPackageModal({ isOpen, onClose, onSuccess, package: 
           </div>
           <p className="text-xs text-gray-500 mt-1">
             Enter the price in Indonesian Rupiah (e.g., 299000)
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="edit-type" className="block text-sm font-medium text-gray-700 mb-2">
+            Package Type *
+          </label>
+          <select
+            id="edit-type"
+            value={formData.type}
+            onChange={(e) => setFormData({ ...formData, type: e.target.value as 'QUIZ' | 'CBT' | 'OSCE' })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            required
+            disabled={loading}
+          >
+            <option value="QUIZ">Quiz - Practice questions for casual learning</option>
+            <option value="CBT">CBT - Computer-Based Test (formal examination)</option>
+            <option value="OSCE">OSCE - Objective Structured Clinical Examination</option>
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Select the assessment type for mission tracking
           </p>
         </div>
 
